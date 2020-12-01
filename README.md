@@ -4,6 +4,17 @@ The first one, **preprocess**, contains a pipeline programmed in BASH, that can 
 
 The output consists of a workable.fasta file, ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files.
 
+This pipeline depends on:
+[bzip2](http://www.bzip.org)
+[gzip](https://www.gzip.org)
+[seqtk](https://github.com/lh3/seqtk)
+[BBDuk](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide)
+[PEAR](https://cme.h-its.org/exelixis/web/software/pear)
+[R](https://www.r-project.org)
+[tidyverse](https://www.tidyverse.org) R package
+
+Once this tools are installed, the [preprocess_pipeline_conf.bash*(https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.bash) has to be edited to set the approprate paths.
+
 To see the help run ```./preprocess_pipeline.bash --help```
 
 ```
