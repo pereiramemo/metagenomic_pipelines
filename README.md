@@ -4,7 +4,7 @@ The first one, **preprocess**, contains a pipeline programmed in BASH, that can 
 
 The output consists of a workable.fasta file, ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files.
 
-This pipeline depends on:
+This pipeline depends on:  
 [bzip2](http://www.bzip.org)  
 [gzip](https://www.gzip.org)  
 [seqtk](https://github.com/lh3/seqtk)  
