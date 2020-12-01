@@ -8,18 +8,18 @@ To see the help run `./preprocess_pipeline.bash --help`
 
 `
 Usage: ./preprocess_pipeline.bash <options>
---help                          print this help
---clean t|f                     remove all intermediate files
---merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")
---min_qual NUM                  minimum quality score to trim reads (default 20)
---min_overlap NUM               minimum overlap to merge paired end reads with pear
---nslots NUM                    number of threads used (default 12)
---output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)
---overwrite t|f                 overwrite previous directory (default f)
---pvalue NUM                    p value used to run pear. See pear help for valid p values (default: 0.01)
---reads CHAR                    input R1 reads
---reads2 CHAR                   input R2 reads
---sample_name CHAR              sample name (default metagenomex)
---subsample t|f                 subsample metagenome to 10K to test execution (default f)
---trim_adapters t|f             check for adapters and trim (default f)
+--help                          print this help  
+--clean t|f                     remove all intermediate files  
+--merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")  
+--min_qual NUM                  minimum quality score to trim reads (default 20)  
+--min_overlap NUM               minimum overlap to merge paired end reads with pear  
+--nslots NUM                    number of threads used (default 12)  
+--output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)  
+--overwrite t|f                 overwrite previous directory (default f)  
+--pvalue NUM                    p value used to run pear. See pear help for valid p values (default: 0.01)  
+--reads CHAR                    input R1 reads  
+--reads2 CHAR                   input R2 reads  
+--sample_name CHAR              sample name (default metagenomex)  
+--subsample t|f                 subsample metagenome to 10K to test execution (default f)  
+--trim_adapters t|f             check for adapters and trim (default f)  
 `
