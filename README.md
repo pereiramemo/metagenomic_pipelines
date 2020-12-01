@@ -13,7 +13,7 @@ This pipeline depends on:
 [R](https://www.r-project.org)  
 [tidyverse](https://www.tidyverse.org) R package  
 
-Once this tools are installed, the [preprocess_pipeline_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.bash) has to be edited to set the approprate paths.
+Once these tools are installed, the [preprocess_pipeline_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.bash) has to be edited to set the correct paths.
 
 To see the help run ```./preprocess_pipeline.bash --help```
 
