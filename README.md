@@ -4,9 +4,9 @@ The first one, **preprocess**, contains a pipeline programmed in BASH, that can 
 
 The output consists of a workable.fasta file, ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files.
 
-To see the help run `./preprocess_pipeline.bash --help`
+To see the help run ```./preprocess_pipeline.bash --help```
 
-`
+```
 Usage: ./preprocess_pipeline.bash <options>
 --help                          print this help  
 --clean t|f                     remove all intermediate files  
@@ -22,4 +22,4 @@ Usage: ./preprocess_pipeline.bash <options>
 --sample_name CHAR              sample name (default metagenomex)  
 --subsample t|f                 subsample metagenome to 10K to test execution (default f)  
 --trim_adapters t|f             check for adapters and trim (default f)  
-`
+```
