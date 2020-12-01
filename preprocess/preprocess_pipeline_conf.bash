@@ -14,7 +14,8 @@ cutadapt="${LOCAL}/bin/cutadapt"
 vsearch="/usr/bin/vsearch"
 bzip2="/bin/bzip2"
 gunzip="/bin/gunzip"
-fq2fa="/home/epereira/bin/fq2fa.sh"
+fq2fa="${HOME}/workspace/repositories/metagenomic_pipelines/preprocess/\
+resources/fq2fa.sh"
 
 # files
 ADAPTERS="${BIN}/bbmap/bbmap-${bbmap_version}/resources/adapters.fa"
