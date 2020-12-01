@@ -12,7 +12,7 @@ Usage: ./preprocess_pipeline.bash <options>
 --clean t|f                     remove all intermediate files  
 --merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")  
 --min_qual NUM                  minimum quality score to trim reads (default 20)  
---min_overlap NUM               minimum overlap to merge paired end reads with pear  
+--min_overlap NUM               minimum overlap to merge paired-end reads with pear  
 --nslots NUM                    number of threads used (default 12)  
 --output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)  
 --overwrite t|f                 overwrite previous directory (default f)  
