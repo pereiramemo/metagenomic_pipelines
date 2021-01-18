@@ -21,7 +21,7 @@ Usage: ./preprocess_pipeline.bash <options>
 --nslots NUM                    number of threads used (default 12)
 --output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)
 --output_pe t|f                 output quality checked paired-end reads as fastq files (default f)
---output_merged t|f             output quality checked merged reads as fasta files (i.e., workable.fasta) (default t)
+--output_merged t|f             output quality checked merged reads as fasta file (i.e., workable.fasta) (default t)
 --overwrite t|f                 overwrite previous directory (default f)
 --pvalue NUM                    p value used to run pear. See pear help for valid p values (default: 0.01)
 --reads CHAR                    input R1 reads
