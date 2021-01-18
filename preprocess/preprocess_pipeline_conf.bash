@@ -14,8 +14,8 @@ cutadapt="${LOCAL}/bin/cutadapt"
 vsearch="/usr/bin/vsearch"
 bzip2="/bin/bzip2"
 gunzip="/bin/gunzip"
-fq2fa="${HOME}/workspace/repositories/metagenomic_pipelines/preprocess/\
-resources/fq2fa.sh"
+fq2fa="${PREPROCESS_DIR}/resources/fq2fa.sh"
+plots="${PREPROCESS_DIR}/resources/plots.R"
 
 # files
 ADAPTERS="${BIN}/bbmap/bbmap-${bbmap_version}/resources/adapters.fa"
@@ -23,7 +23,7 @@ ADAPTERS="${BIN}/bbmap/bbmap-${bbmap_version}/resources/adapters.fa"
 # functions
 function count_fastq {
 
-  N=$( wc -l  "${1}" | cut -f1 -d" " )
+  N=$(wc -l  "${1}" | cut -f1 -d" ")
   N=$( echo "${N}" / 4 | bc -l )
   echo "${N}"
 
@@ -31,7 +31,7 @@ function count_fastq {
 
 function count_fasta {
 
-  N=$( egrep -c ">" "${1}" )
+  N=$(egrep -c ">" "${1}")
   echo "${N}"
 
 }
