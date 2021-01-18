@@ -1,4 +1,3 @@
-
 ###############################################################################
 ### 1. Set env
 ###############################################################################
@@ -16,13 +15,10 @@ show_usage(){
 Usage: ./preprocess_pipeline.bash <options>
 --help                          print this help
 --clean t|f                     remove all intermediate files
---merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")
 --min_qual NUM                  minimum quality score to trim reads (default 20)
---min_overlap NUM               minimum overlap to merge paired-end reads with pear
 --nslots NUM                    number of threads used (default 12)
 --output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)
 --overwrite t|f                 overwrite previous directory (default f)
---pvalue NUM                    p value used to run pear. See pear help for valid p values (default: 0.01)
 --reads CHAR                    input R1 reads
 --reads2 CHAR                   input R2 reads
 --sample_name CHAR              sample name (default metagenomex)
@@ -54,32 +50,6 @@ while :; do
   --clean=) # Handle the empty case
   printf 'Using default environment.\n' >&2
   ;;
-#############
-  --merger)
-  if [[ -n "${2}" ]]; then
-    MERGER="${2}"
-    shift
-  fi
-  ;;
-  --merger=?*)
-  MERGER="${1#*=}" # Delete everything up to "=" and assign the remainder.
-  ;;
-  --merger=) # Handle the empty case
-  printf 'Using default environment.\n' >&2
-  ;;
-#############
-  --min_overlap)
-  if [[ -n "${2}" ]]; then
-    MIN_OVERLAP="${2}"
-    shift
-  fi
-  ;;
-  --min_overlap=?*)
-  MIN_OVERLAP="${1#*=}" # Delete everything up to "=" and assign the remainder.
-  ;;
-  --min_overlap=) # Handle the empty case
-  printf 'Using default environment.\n' >&2
-  ;;    
 #############
   --min_qual)
   if [[ -n "${2}" ]]; then
@@ -130,19 +100,6 @@ while :; do
   OVERWRITE="${1#*=}" # Delete everything up to "=" and assign the remainder.
   ;;
   --overwrite=) # Handle the empty case
-  printf 'Using default environment.\n' >&2
-  ;;
- #############
-  --pvalue)
-  if [[ -n "${2}" ]]; then
-    PVALUE="${2}"
-    shift
-  fi
-  ;;
-  --pvalue=?*)
-  PVALUE="${1#*=}" # Delete everything up to "=" and assign the remainder.
-  ;;
-  --pvalue=) # Handle the empty case
   printf 'Using default environment.\n' >&2
   ;;
 #############
@@ -246,14 +203,6 @@ if [[ -z "${CLEAN}" ]]; then
   CLEAN="f"
 fi
 
-if [[ -z "${MERGER}" ]]; then
-  MERGER="pear"
-fi
-
-if [[ -z "${MIN_OVERLAP}" ]]; then
-  MIN_OVERLAP="10"
-fi 
-
 if [[ -z "${MIN_QUAL}" ]]; then
   MIN_QUAL=20
 fi  
@@ -266,14 +215,9 @@ if [[ -z "${OVERWRITE}" ]]; then
   OVERWRITE="f"
 fi
 
-if [[ -z "${PVALUE}" ]]; then
-  PVALUE="0.01"
-fi  
-
 if [[ -z "${SAMPLE_NAME}" ]]; then
   SAMPLE_NAME="metagenomex"
 fi  
-
 
 if [[ -z "${SUBSAMPLE}" ]]; then
   SUBSAMPLE="f"
@@ -288,10 +232,12 @@ fi
 ###############################################################################
 
 ### test parameters
+# DATA_DIR="/home/epereira/workspace/dev/indicators_contaminants_2018/data/"
+# PREPRO_DIR="/home/epereira/workspace/dev/indicators_contaminants_2018/data/metagenomics/prepro"
 # R1="${DATA_DIR}/metagenomics/AdapterClipped/Sample_1/1_R1_clipped.fastq.bz2"
 # R2="${DATA_DIR}/metagenomics/AdapterClipped/Sample_1/1_R2_clipped.fastq.bz2"
 # NSLOTS=12
-# OUTPUT_DIR="${PREPRO_DIR}/sample_1"
+# OUTPUT_DIR="${PREPRO_DIR}/sample_1_paired_end"
 # SAMPLE_NAME="sample_1"
 # OVERWRITE="f"
 #####################
@@ -471,168 +417,40 @@ if [[ "${TRIM_ADAPTERS}" == "t" ]]; then
 fi
 
 ###############################################################################
-### 10. Merge
+### 10. Quality check paired-end reads
 ###############################################################################
 
-if [[ "${MERGER}" == "pear" ]]; then
-
-  "${pear}" \
-  -f "${R1}" \
-  -r "${R2}" \
-  -o "${OUTPUT_DIR}/${SAMPLE_NAME}" \
-  -j "${NSLOTS}" \
-  -p "${PVALUE}" \
-  --min-overlap "${MIN_OVERLAP}"
-
-  if [[ $? != 0 ]]; then
-    echo "merge with ${pear} failed"
-    exit 1
-  fi
-  
-  mv "${OUTPUT_DIR}/${SAMPLE_NAME}.assembled.fastq" \
-  "${OUTPUT_DIR}/${SAMPLE_NAME}.assembled-02.fastq"
-  mv "${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.forward.fastq" \
-  "${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.forward-02.fastq"
-  mv "${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.reverse.fastq" \
-  "${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.reverse-02.fastq"
-  mv "${OUTPUT_DIR}/${SAMPLE_NAME}.discarded.fastq" \
-  "${OUTPUT_DIR}/${SAMPLE_NAME}.discarded-02.fastq"
-  
-  R_ASSEM="${OUTPUT_DIR}/${SAMPLE_NAME}.assembled-02.fastq"
-  R1_UNASSEM="${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.forward-02.fastq"
-  R2_UNASSEM="${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.reverse-02.fastq"
-  R_DISCARD="${OUTPUT_DIR}/${SAMPLE_NAME}.discarded-02.fastq"
-
-  if [[ ! -s "${R_ASSEM}" ]]; then
-    echo "Failed merging: 0 merged reads with ${pear}"
-    exit 1
-  fi  
-  
-fi  
-
-if [[ "${MERGER}" == "bbmerge" ]]; then
-
-  R_ASSEM="${OUTPUT_DIR}/${SAMPLE_NAME}.assembled-02.fastq"
-  R1_UNASSEM="${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.forward-02.fastq"
-  R2_UNASSEM="${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.reverse-02.fastq"
-  INSERT_HIST="${OUTPUT_DIR}/${SAMPLE_NAME}_insert_hist.txt"
-  R_DISCARD="${OUTPUT_DIR}/${SAMPLE_NAME}.discarded-02.fastq"
-  
-  "${bbmerge}" \
-  in="${R1}" \
-  in2="${R2}" \
-  out="${R_ASSEM}" \
-  outu="${R1_UNASSEM}" \
-  outu2="${R2_UNASSEM}" \
-  ihist="${INSERT_HIST}"
-  
-  if [[ $? != 0 ]]; then
-    echo "merge with ${bbmerge} failed"
-    exit 1
-  fi
-  
-  touch "${R_DISCARD}"
-  
-fi
-
-###############################################################################
-### 11. Quality check: merged reads
-###############################################################################
-
-R_ASSEM_QC="${OUTPUT_DIR}/${SAMPLE_NAME}.assembled_qc-03.fastq"
+R1_QC="${OUTPUT_DIR}/${SAMPLE_NAME}_R1_qc-02.fastq"
+R2_QC="${OUTPUT_DIR}/${SAMPLE_NAME}_R2_qc-02.fastq"
 
 "${bbduk}" \
-in="${R_ASSEM}" \
-out="${R_ASSEM_QC}" \
+in="${R1}" \
+in2="${R2}" \
+out="${R1_QC}" \
+out2="${R2_QC}" \
 minlength=50 \
 threads="${NSLOTS}" \
 qtrim=rl \
 trimq="${MIN_QUAL}"
 
 if [[ $? -ne 0 ]]; then
-  echo "bbduk quality trimming assembled reads failed"
+  echo "bbduk quality trimming paired-end reads failed"
   exit 1
 fi  
 
 ###############################################################################
-### 12. Quality check: unmerged reads
-###############################################################################
-
-if [[ -s "${R1_UNASSEM}" ]]; then
-
-  R1_UNASSEM_QC="${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.forward_qc-03.fastq"
-  R2_UNASSEM_QC="${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.reverse_qc-03.fastq"
-
-  "${bbduk}" \
-  in="${R1_UNASSEM}" \
-  in2="${R2_UNASSEM}" \
-  out="${R1_UNASSEM_QC}" \
-  out2="${R2_UNASSEM_QC}" \
-  minlength=50 \
-  threads="${NSLOTS}" \
-  qtrim=rl \
-  trimq="${MIN_QUAL}"
-
-  if [[ $? -ne 0 ]]; then
-    echo "bbduk quality trimming unassembled reads failed"
-    exit 1
-  fi  
-
-fi
-
-###############################################################################
-### 13. Convert to fasta
-###############################################################################
-
-echo "converting to fasta ..."
-
-R_ASSEM_QC_FA="${OUTPUT_DIR}/${SAMPLE_NAME}.assembled_qc-03.fasta"
-
-"${fq2fa}" "${R_ASSEM_QC}" > "${R_ASSEM_QC_FA}"
-
-if [[ $? -ne 0 ]]; then
-  echo "fq2fa merged reads failed"
-  exit 1
-fi
-
-if [[ -s "${R1_UNASSEM_QC}" ]]; then
-
-  R1_UNASSEM_QC_FA="${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.forward_qc-03.fasta"
-  R2_UNASSEM_QC_FA="${OUTPUT_DIR}/${SAMPLE_NAME}.unassembled.reverse_qc-03.fasta"
-  
-  "${fq2fa}" "${R1_UNASSEM_QC}" > "${R1_UNASSEM_QC_FA}"
-
-  if [[ $? -ne 0 ]]; then
-    echo "fq2fa unmerged forward reads failed"
-    exit 1
-  fi
-  
-  "${fq2fa}" "${R2_UNASSEM_QC}" > "${R2_UNASSEM_QC_FA}"
-
-  if [[ $? -ne 0 ]]; then
-    echo "fq2fa unmerged reverse reads failed"
-    exit 1
-  fi
-  
-fi
-
-###############################################################################
-### 15. Compute stats
+### 11. Compute stats
 ###############################################################################
 
 echo "computing statistics ..."
 
 if [[ -a "${R1_AT}" ]]; then
 
-  FILES=$(ls \
-  "${R1_INPUT}" "${R2_INPUT}" "${R1_AT}" "${R2_AT}" "${R_ASSEM}" "${R1_UNASSEM}" \
-  "${R2_UNASSEM}" "${R_DISCARD}" "${R_ASSEM_QC}" "${R1_UNASSEM_QC}" "${R2_UNASSEM_QC}")
+  FILES=$(ls "${R1_INPUT}" "${R2_INPUT}" "${R1_AT}" "${R2_AT}" "${R1_QC}" "${R2_QC}")
 
 else
 
-  FILES=$(ls \
-  "${R1}" "${R2}" "${R_ASSEM}" "${R1_UNASSEM}" \
-  "${R2_UNASSEM}" "${R_DISCARD}" "${R_ASSEM_QC}" "${R1_UNASSEM_QC}" "${R2_UNASSEM_QC}")
+  FILES=$(ls "${R1_INPUT}" "${R2_INPUT}" "${R1_QC}" "${R2_QC}")
 
 fi
 
@@ -685,7 +503,7 @@ fi
 rm "${OUTPUT_DIR}/stats_tmp.tsv"
 
 ###############################################################################
-### 16. Plot stats
+### 12. plot stats
 ###############################################################################
 
 echo "creating plot ..."
@@ -716,6 +534,7 @@ if [[ "${CLEAN}" == "t" ]]; then
     fi
   fi  
     
+    
   if [[ "${SUBSAMPLE}" == "t" ]]; then
    
     rm "${R1_REDU}" "${R2_REDU}"
@@ -736,18 +555,4 @@ if [[ "${CLEAN}" == "t" ]]; then
       exit 1
     fi
   fi
-  
-  rm "${R_ASSEM}" "${R1_UNASSEM}" "${R2_UNASSEM}" "${R_DISCARD}"
-  rm "${R_ASSEM_QC}" "${R1_UNASSEM_QC}" "${R2_UNASSEM_QC}"
-
-  if [[ $? -ne 0 ]]; then
-    echo "rm intermediate files failed"
-    exit 1
-  fi
 fi
-
-###############################################################################
-### 18. rename to workable
-###############################################################################
-
-mv "${R_ASSEM_QC_FA}" "${OUTPUT_DIR}/${SAMPLE_NAME}_workable.fasta"
