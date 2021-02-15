@@ -1,11 +1,10 @@
 # Metagenomic pipelines
-This repository contains the code to preprocess and analyze metagenomic data, organized in two different pipelines. 
-The first one, **preprocess**, contains a pipeline programmed in BASH, that can be executed from the command line to preprocess raw Illumina paired-end reads obtained from metagenomic samples (named [preprocess_pipeline.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline.bash)). The main tasks consist of checking for the presence of adapters, merging the paired-end reads, and quality trimming the merged and unmerged reads. It additionally computes and plots the number of reads and mean read length of the intermediate files to trace the preprocessing tasks and detect potential irregularities.
+This repository contains the code to preprocess and analyze metagenomic data, organized in two different pipelines: **preprocess**, and **mg_traits**. 
 
-The output consists of a fasta file (i.e., ```*workable.fasta```), ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files (i.e., ```stats.tsv``` and ```stats_plots.png```).  
+1. **preprocess** contains a pipeline programmed in BASH, that can be executed from the command line to preprocess raw Illumina paired-end reads obtained from metagenomic samples (named [preprocess_pipeline.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline.bash)). The main tasks consist of checking for the presence of adapters, merging the paired-end reads, and quality trimming the merged and unmerged reads. It additionally computes and plots the number of reads and mean read length of the intermediate files to trace the preprocessing tasks and detect potential irregularities. The output consists of a fasta file (i.e., ```*workable.fasta```), ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files (i.e., ```stats.tsv``` and ```stats_plots.png```).  
 Optionally, the pipeline can be used to produce quality checked paired-end reads.
 
-This pipeline depends on:  
+Dependencies:  
 [bzip2](http://www.bzip.org)  
 [gzip](https://www.gzip.org)  
 [seqtk](https://github.com/lh3/seqtk)  
@@ -37,3 +36,35 @@ Usage: ./preprocess_pipeline.bash <options>
 --subsample t|f                 subsample metagenome to 10K to test execution (default f)  
 --trim_adapters t|f             check for adapters and trim (default f)  
 ```
+
+2. mg_traits contains the pipeline [mg_traits_lite](). This tool is programmed in BASH, awk, and R, and is dedicated to the computation of 25 (and counting) metagenomic traits, ranging grom GC varianca and amino acid composition to funcional diversity and average genome size. It takes as an input a preprocessed metagenomic sample and outputs the computed metagenomic traits organized in different tables, and grouped in different folders according to the type of data source (see fig. 1). 
+
+Dependencies:
+[BBDuk](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide)
+[PEAR](https://cme.h-its.org/exelixis/web/software/pear)
+[FragGeneScan](https://omics.informatics.indiana.edu/FragGeneScan/)
+[UProC](http://uproc.gobics.de/)
+[EMBOSS](http://emboss.sourceforge.net/)
+[VSEARCH](https://github.com/torognes/vsearch)
+[AGS and ACN tools](https://github.com/pereiramemo/AGS-and-ACN-tools)
+[HMMMER](http://hmmer.org)
+
+
+```
+Usage: ./mg_traits_lite.bash <options>
+--help                          print this help
+--clean t|f                     remove all intermediate files
+--confidence NUM                confidence value to run rdp bayes classifier (from 0 to 100; default 50)
+--evalue_acn NUM                evalue to filter reads for for AGS computaton (default 1e-15)
+--evalue_div NUM                evalue to filter reads for diversity estimation (default 1e-15)
+--input_file CHAR               input workable fasta file
+--nslots NUM                    number of threads used (default 12)
+--max_length NUM                maximum read length used to trim reads (from the 3' end) for AGS computaton (default 180)
+--min_length NUM                minimum read length used to estimate taxonomic diversity (default 100)
+--output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)
+--overwrite t|f                 overwrite previous directory (default f)
+--ref_db CHAR                   refernce database to run NBC (default silva_nr99_v138_train_set.fa.gz) 
+--sample_name CHAR              sample name (default metagenomex)
+--train_file_name CHAR          train file name to run FragGeneScan, see FragGeneScan help for options (default illumina_5)
+```
+
