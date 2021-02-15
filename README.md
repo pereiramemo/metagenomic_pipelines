@@ -47,7 +47,7 @@ Usage: ./preprocess_pipeline.bash <options>
 [EMBOSS](http://emboss.sourceforge.net/)  
 [VSEARCH](https://github.com/torognes/vsearch)  
 [AGS and ACN tools](https://github.com/pereiramemo/AGS-and-ACN-tools)  
-[HMMMER](http://hmmer.org)  
+[HMMER](http://hmmer.org)  
 [R](https://www.r-project.org)  
 [tidyverse](https://www.tidyverse.org) R package  
 
