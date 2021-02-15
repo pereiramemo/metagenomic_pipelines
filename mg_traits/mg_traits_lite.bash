@@ -12,7 +12,7 @@ mg_traits_lite_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./preprocess_pipeline.bash <options>
+Usage: ./mg_traits_lite.bash <options>
 --help                          print this help
 --clean t|f                     remove all intermediate files
 --confidence NUM                confidence value to run rdp bayes classifier (from 0 to 100; default 50)
