@@ -37,7 +37,7 @@ Usage: ./preprocess_pipeline.bash <options>
 --trim_adapters t|f             check for adapters and trim (default f)  
 ```
 
-2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.bash). This tool is programmed in BASH, AWK, and R, and is dedicated to the computation of 25 (and counting) metagenomic traits, ranging from GC variance and amino acid composition to functional diversity and average genome size. It takes as an input a preprocessed (unassembled) metagenomic sample and outputs the computed metagenomic traits organized in different tables and grouped in separate folders according to the type of data source. 
+2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.bash). This tool is a command line application programmed in BASH, AWK, and R, dedicated to the computation of 25 (and counting) metagenomic traits, ranging from GC variance and amino acid composition to functional diversity and average genome size. It takes as an input a preprocessed (unassembled) metagenomic sample and outputs the computed metagenomic traits organized in different tables and grouped in separate folders according to the type of data source. 
 
     **Dependencies**:  
 [BBDuk](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide)  
@@ -48,6 +48,8 @@ Usage: ./preprocess_pipeline.bash <options>
 [VSEARCH](https://github.com/torognes/vsearch)  
 [AGS and ACN tools](https://github.com/pereiramemo/AGS-and-ACN-tools)  
 [HMMMER](http://hmmer.org)  
+[R](https://www.r-project.org)  
+[tidyverse](https://www.tidyverse.org) R package  
 
 
     Similarly as mentioned above, once these tools are installed the configuration file [mg_traits_lite_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite_conf.bash) has to be edited to set the correct paths to define the variables.
