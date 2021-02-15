@@ -1,10 +1,10 @@
 # Metagenomic pipelines
 This repository contains the code to preprocess and analyze metagenomic data, organized in two different pipelines: **preprocess_pipeline.bash**, and **mg_traits_lite.bash**. 
 
-The folder **preprocess** contains a pipeline programmed in BASH, that can be executed from the command line to preprocess raw Illumina paired-end reads obtained from metagenomic samples (named [preprocess_pipeline.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline.bash)). The main tasks consist of checking for the presence of adapters, merging the paired-end reads, and quality trimming the merged and unmerged reads. It additionally computes and plots the number of reads and mean read length of the intermediate files to trace the preprocessing tasks and detect potential irregularities. The output consists of a fasta file (i.e., ```*workable.fasta```), ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files (i.e., ```stats.tsv``` and ```stats_plots.png```).  
+1. The folder **preprocess** contains a pipeline programmed in BASH, that can be executed from the command line to preprocess raw Illumina paired-end reads obtained from metagenomic samples (named [preprocess_pipeline.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline.bash)). The main tasks consist of checking for the presence of adapters, merging the paired-end reads, and quality trimming the merged and unmerged reads. It additionally computes and plots the number of reads and mean read length of the intermediate files to trace the preprocessing tasks and detect potential irregularities. The output consists of a fasta file (i.e., ```*workable.fasta```), ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files (i.e., ```stats.tsv``` and ```stats_plots.png```).  
 Optionally, the pipeline can be used to produce quality checked paired-end reads.
 
-**Dependencies**:  
+    **Dependencies**:  
 [bzip2](http://www.bzip.org)  
 [gzip](https://www.gzip.org)  
 [seqtk](https://github.com/lh3/seqtk)  
@@ -13,9 +13,9 @@ Optionally, the pipeline can be used to produce quality checked paired-end reads
 [R](https://www.r-project.org)  
 [tidyverse](https://www.tidyverse.org) R package  
 
-Once these tools are installed, the [preprocess_pipeline_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.bash) has to be edited to set the correct paths.
+    Once these tools are installed, the [preprocess_pipeline_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.bash) has to be edited to set the correct paths.
 
-To see the help run ```./preprocess_pipeline.bash --help```
+    To see the help run ```./preprocess_pipeline.bash --help```
 
 ```
 Usage: ./preprocess_pipeline.bash <options>
@@ -50,9 +50,9 @@ Usage: ./preprocess_pipeline.bash <options>
 [HMMMER](http://hmmer.org)  
 
 
-Similarly as mentioned above, once these tools are installed the configuration file [mg_traits_lite_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite_conf.bash) has to be edited to set the correct paths to define the variables.
+    Similarly as mentioned above, once these tools are installed the configuration file [mg_traits_lite_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite_conf.bash) has to be edited to set the correct paths to define the variables.
 
-To see the help run ```./mg_traits_lite.bash --help```  
+    To see the help run ```./mg_traits_lite.bash --help```  
 
 
 ```
