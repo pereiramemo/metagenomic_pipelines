@@ -74,11 +74,12 @@ Usage: ./mg_traits_lite.bash <options>
 --ref_db CHAR                   refernce database to run NBC (default silva_nr99_v138_train_set.fa.gz) 
 --sample_name CHAR              sample name (default metagenomex)
 --train_file_name CHAR          train file name to run FragGeneScan, see FragGeneScan help for options (default illumina_5)
-```
+
+<a name="figure1">
+</a>
 
 ![Figure 1](./figures/Mg-Traits2.png)
 
-<a name="figure1">
 __Figure 1. Mg-Traits pipeline. The 25 metagenomic traits computed by the Mg-Traits pipeline are divided into four different groups.__ 
 The first includes the metagenomic traits computed at the nucleotide level: (1) GC content, (2) GC variance, and (3) Tetranucleotide frequency. 
 The second group includes the traits obtained from the open reading frame (ORF) sequence data: (4) ORFs to Base Pairs (BPs) ratio, (5) Codon frequency, (6) Amino acid frequency, and (7) Acidic to basic amino acid ratio. 
@@ -86,5 +87,5 @@ The third group is based on the functional annotation of the ORF amino acid sequ
 [Pfam](https://pfam.xfam.org), [Resfam](http://www.dantaslab.org/resfams), and [Biosynthetic Gene Cluster (BGC) domains](https://doi.org/10.1101/2021.01.20.427441). 
 Additionally, this group includes (20) the percentage of transcription factors (TFs) and (21) the average genome size (AGS). 
 Lastly, in the fourth group are included the taxonomy-related metagenomic traits: (22) average copy number of 16S rRNA genes (ACN), taxonomic (23) composition, (24) diversity, and (25) richness.
-</a>
+
 
