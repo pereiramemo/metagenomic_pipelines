@@ -79,8 +79,7 @@ Usage: ./mg_traits_lite.bash <options>
 
 ![Figure 1](./figures/Mg-Traits2.png)
 
-Figure 1.
-Mg-Traits pipeline. The 25 metagenomic traits computed by the Mg-Traits pipeline are divided into four different groups. 
+__Figure 1. Mg-Traits pipeline. The 25 metagenomic traits computed by the Mg-Traits pipeline are divided into four different groups.__ 
 The first includes the metagenomic traits computed at the nucleotide level: (1) GC content, (2) GC variance, and (3) Tetranucleotide frequency. 
 The second group includes the traits obtained from the open reading frame (ORF) sequence data: (4) ORFs to Base Pairs (BPs) ratio, (5) Codon frequency, (6) Amino acid frequency, and (7) Acidic to basic amino acid ratio. 
 The third group is based on the functional annotation of the ORF amino acid sequences. The first 12 metagenomic traits (from 8 to 19 in the figure) comprise the composition, diversity, richness, and percentage of annotated genes for three different sets of genes: 
