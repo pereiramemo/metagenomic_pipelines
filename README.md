@@ -78,4 +78,4 @@ Usage: ./mg_traits_lite.bash <options>
 
 
 
-![Figure 1](mg_traits/figures/Mg-Traits2.png)
+![Figure 1](./mg_traits/figures/Mg-Traits2.png)
