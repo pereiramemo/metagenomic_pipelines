@@ -38,7 +38,7 @@ Usage: ./preprocess_pipeline.bash <options>
 ```
 
 2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.bash). This tool is a command line application programmed in BASH, AWK, and R, dedicated to the computation of 25 (and counting) metagenomic traits, ranging from GC variance and amino acid composition to functional diversity and average genome size. It takes as an input a preprocessed (unassembled) metagenomic sample and outputs the computed metagenomic traits organized in different tables and grouped in separate folders according to the type of data source
-(see [Fig. 1](#Figure 1)). 
+(see [Fig. 1](#figure1)). 
 
     **Dependencies**:  
 [BBDuk](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide)  
@@ -76,7 +76,7 @@ Usage: ./mg_traits_lite.bash <options>
 --train_file_name CHAR          train file name to run FragGeneScan, see FragGeneScan help for options (default illumina_5)
 ```
 
-
+<a name="figure1">
 ![Figure 1](./figures/Mg-Traits2.png)
 
 __Figure 1. Mg-Traits pipeline. The 25 metagenomic traits computed by the Mg-Traits pipeline are divided into four different groups.__ 
@@ -86,3 +86,5 @@ The third group is based on the functional annotation of the ORF amino acid sequ
 [Pfam](https://pfam.xfam.org), [Resfam](http://www.dantaslab.org/resfams), and [Biosynthetic Gene Cluster (BGC) domains](https://doi.org/10.1101/2021.01.20.427441). 
 Additionally, this group includes (20) the percentage of transcription factors (TFs) and (21) the average genome size (AGS). 
 Lastly, in the fourth group are included the taxonomy-related metagenomic traits: (22) average copy number of 16S rRNA genes (ACN), taxonomic (23) composition, (24) diversity, and (25) richness.
+</a>
+
