@@ -75,6 +75,8 @@ Usage: ./mg_traits_lite.bash <options>
 --sample_name CHAR              sample name (default metagenomex)
 --train_file_name CHAR          train file name to run FragGeneScan, see FragGeneScan help for options (default illumina_5)
 
+```
+
 <a name="figure1">
 </a>
 
