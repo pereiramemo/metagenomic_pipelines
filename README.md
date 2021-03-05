@@ -38,7 +38,7 @@ Usage: ./preprocess_pipeline.bash <options>
 ```
 
 2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.bash). This tool is a command line application programmed in BASH, AWK, and R, dedicated to the computation of 25 (and counting) metagenomic traits, ranging from GC variance and amino acid composition to functional diversity and average genome size. It takes as an input a preprocessed (unassembled) metagenomic sample and outputs the computed metagenomic traits organized in different tables and grouped in separate folders according to the type of data source
-(see [Fig. 1](Figure 1)). 
+(see [Fig. 1](#Figure 1)). 
 
     **Dependencies**:  
 [BBDuk](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide)  
