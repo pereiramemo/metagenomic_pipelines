@@ -76,9 +76,9 @@ Usage: ./mg_traits_lite.bash <options>
 --train_file_name CHAR          train file name to run FragGeneScan, see FragGeneScan help for options (default illumina_5)
 ```
 
-<a name="figure1">
 ![Figure 1](./figures/Mg-Traits2.png)
 
+<a name="figure1">
 __Figure 1. Mg-Traits pipeline. The 25 metagenomic traits computed by the Mg-Traits pipeline are divided into four different groups.__ 
 The first includes the metagenomic traits computed at the nucleotide level: (1) GC content, (2) GC variance, and (3) Tetranucleotide frequency. 
 The second group includes the traits obtained from the open reading frame (ORF) sequence data: (4) ORFs to Base Pairs (BPs) ratio, (5) Codon frequency, (6) Amino acid frequency, and (7) Acidic to basic amino acid ratio. 
