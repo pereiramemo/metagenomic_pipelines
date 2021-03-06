@@ -88,10 +88,10 @@ The second group includes the traits obtained from the open reading frame (ORF) 
 The third group is based on the functional annotation of the ORF amino acid sequences. The first 12 metagenomic traits (from 8 to 19 in the figure) comprise the composition, diversity, richness, and percentage of annotated genes for three different sets of genes: 
 [Pfam](https://pfam.xfam.org), [Resfam](http://www.dantaslab.org/resfams), and [Biosynthetic Gene Cluster (BGC) domains](https://doi.org/10.1101/2021.01.20.427441). 
 Additionally, this group includes (20) the percentage of transcription factors (TFs) and (21) the average genome size (AGS). 
-Lastly, in the fourth group are included the taxonomy-related metagenomic traits: (22) average copy number of 16S rRNA genes (ACN), taxonomic (23) composition, (24) diversity, and (25) richness.
-&ndsp; 
-&ndsp; 
-&ndsp;
+Lastly, in the fourth group are included the taxonomy-related metagenomic traits: (22) average copy number of 16S rRNA genes (ACN), taxonomic (23) composition, (24) diversity, and (25) richness.  
+
+###
+
 | Number | Metagenomic functional trait | Level | Ecological implications | Reference |
 | ------ | ---------------------------- | ----- | ----------------------- | ----------|
 |1| GC content | Nuceltide | Temperature, Oxygen, Taxonomy | CITE |
