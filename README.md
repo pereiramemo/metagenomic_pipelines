@@ -93,6 +93,6 @@ Lastly, in the fourth group are included the taxonomy-related metagenomic traits
 
 
 | Number | Metagenomic functional trait | Level | Ecological implications | Reference |
----------------------------------------------------------------------------------------
-|1| GC content | Nuceltide | Temperature, Oxygen, Taxnomy | CITE|
+| ------ | ---------------------------- | ----- | ----------------------- | ----------|
+|1| GC content | Nuceltide | Temperature, Oxygen, Taxnomy | CITE |
 
