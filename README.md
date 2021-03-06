@@ -91,7 +91,7 @@ Additionally, this group includes (20) the percentage of transcription factors (
 Lastly, in the fourth group are included the taxonomy-related metagenomic traits: (22) average copy number of 16S rRNA genes (ACN), taxonomic (23) composition, (24) diversity, and (25) richness.
 \
 \
-\
+
 | Number | Metagenomic functional trait | Level | Ecological implications | Reference |
 | ------ | ---------------------------- | ----- | ----------------------- | ----------|
 |1| GC content | Nuceltide | Temperature, Oxygen, Taxnomy | CITE |
