@@ -89,8 +89,8 @@ The third group is based on the functional annotation of the ORF amino acid sequ
 [Pfam](https://pfam.xfam.org), [Resfam](http://www.dantaslab.org/resfams), and [Biosynthetic Gene Cluster (BGC) domains](https://doi.org/10.1101/2021.01.20.427441). 
 Additionally, this group includes (20) the percentage of transcription factors (TFs) and (21) the average genome size (AGS). 
 Lastly, in the fourth group are included the taxonomy-related metagenomic traits: (22) average copy number of 16S rRNA genes (ACN), taxonomic (23) composition, (24) diversity, and (25) richness.
-
-
+  
+  
 
 | Number | Metagenomic functional trait | Level | Ecological implications | Reference |
 | ------ | ---------------------------- | ----- | ----------------------- | ----------|
