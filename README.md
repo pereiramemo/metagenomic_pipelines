@@ -37,7 +37,8 @@ Usage: ./preprocess_pipeline.bash <options>
 --trim_adapters t|f             check for adapters and trim (default f)  
 ```
 
-2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.bash). This tool is a command line application programmed in BASH, AWK, and R, dedicated to the computation of 25 (and counting) metagenomic traits, ranging from GC variance and amino acid composition to functional diversity and average genome size. It takes as an input a preprocessed (unassembled) metagenomic sample and outputs the computed metagenomic traits organized in different tables and grouped in separate folders according to the type of data source
+2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.bash). This tool is a command line application programmed in BASH, AWK, and R, dedicated to the computation of
+29 (and counting) metagenomic traits, ranging from GC variance and amino acid composition to functional diversity and average genome size. It takes as an input a preprocessed (unassembled) metagenomic sample and outputs the computed metagenomic traits organized in different tables and grouped in separate folders according to the type of data source
 (see [Fig. 1](#figure1)). 
 
     **Dependencies**:  
@@ -80,19 +81,15 @@ Usage: ./mg_traits_lite.bash <options>
 <a name="figure1">
 </a>
 
-![Figure 1](./figures_and_tables/Mg-Traits2.png)
+![Figure 1](./figures_and_tables/Mg_Traits_Lite-ENG.png)
 
-__Figure 1. Mg-Traits pipeline. The 25 metagenomic traits computed by the Mg-Traits pipeline are divided into four different groups.__ 
+__Figure 1. Mg-Traits pipeline. The 29 metagenomic traits computed by the Mg-Traits pipeline are divided into four different groups.__ 
 The first includes the metagenomic traits computed at the nucleotide level: (1) GC content, (2) GC variance, and (3) Tetranucleotide frequency. 
 The second group includes the traits obtained from the open reading frame (ORF) sequence data: (4) ORFs to Base Pairs (BPs) ratio, (5) Codon frequency, (6) Amino acid frequency, and (7) Acidic to basic amino acid ratio. 
-The third group is based on the functional annotation of the ORF amino acid sequences. The first 12 metagenomic traits (from 8 to 19 in the figure) comprise the composition, diversity, richness, and percentage of annotated genes for three different sets of genes: 
-[Pfam](https://pfam.xfam.org), [Resfam](http://www.dantaslab.org/resfams), and [Biosynthetic Gene Cluster (BGC) domains](https://doi.org/10.1101/2021.01.20.427441). 
-Additionally, this group includes (20) the percentage of transcription factors (TFs) and (21) the average genome size (AGS). 
-Lastly, in the fourth group are included the taxonomy-related metagenomic traits: (22) average copy number of 16S rRNA genes (ACN), taxonomic (23) composition, (24) diversity, and (25) richness.  
+The third group is based on the functional annotation of the ORF amino acid sequences. The first 16 metagenomic traits (from 8 to 23 in the figure) comprise the composition, diversity, richness, and percentage of annotated genes for
+four different sets of genes: [Pfam](https://pfam.xfam.org), [Resfam](http://www.dantaslab.org/resfams), [Biosynthetic Gene Cluster (BGC) domains](https://doi.org/10.1101/2021.01.20.427441), and [CAZymes](https://bcb.unl.edu/dbCAN2/) . 
+Additionally, this group includes (24) the percentage of transcription factors (TFs) and (25) the average genome size (AGS). 
+Lastly, in the fourth group are included the taxonomy-related metagenomic traits: (26) average copy number of 16S rRNA genes (ACN), taxonomic (27) composition, (28) diversity, and (29) richness.  
 
-###
 
-| Number | Metagenomic functional trait | Level | Ecological implications | Reference |
-| ------ | ---------------------------- | ----- | ----------------------- | ----------|
-|1| GC content | Nuceltide | Temperature, Oxygen, Taxonomy | CITE |
 
