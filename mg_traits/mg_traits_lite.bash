@@ -18,6 +18,8 @@ Usage: ./mg_traits_lite.bash <options>
 --confidence NUM                confidence value to run rdp bayes classifier (from 0 to 100; default 50)
 --evalue_acn NUM                evalue to filter reads for for AGS computaton (default 1e-15)
 --evalue_div NUM                evalue to filter reads for diversity estimation (default 1e-15)
+--evalue_res NUM                hmmsearch evalue to annotate ResFam hmms (default 1e-15)
+--evalue_caz NUM                hmmsearch evalue to annotate CAZyme hmms (default 1e-15)
 --input_file CHAR               input workable fasta file
 --nslots NUM                    number of threads used (default 12)
 --max_length NUM                maximum read length used to trim reads (from the 3' end) for AGS computaton (default 180)
@@ -91,7 +93,33 @@ while :; do
   ;;
   --evalue_div=) # Handle the empty case
   printf 'Using default environment.\n' >&2
-  ;;        
+  ;;
+#############
+  --evalue_res)
+  if [[ -n "${2}" ]]; then
+    EVALUE_RES="${2}"
+    shift
+  fi
+  ;;
+  --evalue_res=?*)
+  EVALUE_RES="${1#*=}" # Delete everything up to "=" and assign the remainder.
+  ;;
+  --evalue_res=) # Handle the empty case
+  printf 'Using default environment.\n' >&2
+  ;;
+#############
+  --evalue_caz)
+  if [[ -n "${2}" ]]; then
+    EVALUE_CAZ="${2}"
+    shift
+  fi
+  ;;
+  --evalue_caz=?*)
+  EVALUE_CAZ="${1#*=}" # Delete everything up to "=" and assign the remainder.
+  ;;
+  --evalue_caz=) # Handle the empty case
+  printf 'Using default environment.\n' >&2
+  ;;          
 #############
   --input_file)
   if [[ -n "${2}" ]]; then
@@ -254,7 +282,15 @@ if [[ -z "${EVALUE_ACN}" ]]; then
 fi
 
 if [[ -z "${EVALUE_DIV}" ]]; then
-  EVALUE_DIV=1e-15
+  EVALUE_DIV="1e-15"
+fi
+
+if [[ -z "${EVALUE_RES}" ]]; then
+  EVALUE_RES="1e-15"
+fi
+
+if [[ -z "${EVALUE_CAZ}" ]]; then
+  EVALUE_CAZ="1e-15"
 fi
 
 if [[ -z "${NSLOTS}" ]]; then
@@ -274,7 +310,7 @@ if [[ -z "${OVERWRITE}" ]]; then
 fi
 
 if [[ -z "${REF_DB}" ]]; then
-  REF_DB="${RESOURCES_DIR}/silva/silva_v138/silva_nr99_v138_train_set.fa.gz"
+  REF_DB="${MG_TRAITS_RESOURCES}/silva_nr99_v138_train_set.fa.gz"
 fi
   
 if [[ -z "${SAMPLE_NAME}" ]]; then
@@ -367,6 +403,8 @@ fi
 ### 10. Compute AGS
 ###############################################################################
 
+echo -e "\ncomputing ags ...\n"
+
 "${ags}" \
 --input_fna "${INPUT_FILE}" \
 --sample_name "${SAMPLE_NAME}" \
@@ -396,6 +434,8 @@ fi
 ###############################################################################
 # 11. Compute ACN
 ###############################################################################
+
+echo -e "\ncomputing acn ...\n"
 
 "${acn}" \
 --input_fna "${OUTPUT_DIR}/ags/${SAMPLE_NAME}_FBL.fna" \
@@ -504,6 +544,7 @@ echo -e "\ncomputing resfam mg_traits ...\n"
 --output_dir "${OUTPUT_DIR}/res" \
 --sample_name "${SAMPLE_NAME}" \
 --num_genes "${NUM_GENES}" \
+--evalue "${EVALUE_RES}" \
 --nslots "${NSLOTS}"
 
 if [[ $? -ne 0 ]]; then
@@ -522,6 +563,25 @@ echo -e "\ncomputing bgc mg_traits ...\n"
 --output_dir "${OUTPUT_DIR}/bgc" \
 --sample_name "${SAMPLE_NAME}" \
 --num_genes "${NUM_GENES}" \
+--nslots "${NSLOTS}"
+
+if [[ $? -ne 0 ]]; then
+  echo "module5_res_mg_traits.bash failed"
+  exit 1
+fi  
+
+###############################################################################
+### 15. Module 7: CAZymes annotation
+###############################################################################
+
+echo -e "\ncomputing cazyme mg_traits ...\n"
+
+"${MG_TRAITS_DIR}/modules_mg_traits/module7_caz_mg_traits.bash" \
+--input_file "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.faa" \
+--output_dir "${OUTPUT_DIR}/caz" \
+--sample_name "${SAMPLE_NAME}" \
+--num_genes "${NUM_GENES}" \
+--evalue "${EVALUE_CAZ}" \
 --nslots "${NSLOTS}"
 
 if [[ $? -ne 0 ]]; then
