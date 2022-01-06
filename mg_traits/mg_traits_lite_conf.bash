@@ -1,18 +1,18 @@
 # dirs # general
 BIOINF_DIR="/home/bioinf"
 BIN="${BIOINF_DIR}/bin"
-RESOURCES_DIR="${BIOINF_DIR}/resources"
 MG_TRAITS_DIR="${HOME}/workspace/repositories/metagenomic_pipelines/mg_traits"
 MG_TRAITS_RESOURCES="${MG_TRAITS_DIR}/resources_mg_traits"
 LOCAL="/home/epereira/.local/"
 
 # files
 TRANSFACT_ACC="${MG_TRAITS_RESOURCES}/TF.txt"
-RESFAM_HMM="${RESOURCES_DIR}/resfam/Resfams.hmm"
-PFAM_MODEL_DIR="${RESOURCES_DIR}/pfam/uproc/model"
-PFAM_DB="${RESOURCES_DIR}/pfam/uproc/pfam28_db"
-BGC_MODEL_DIR="${RESOURCES_DIR}/bgc/model"
-BGC_DB="${RESOURCES_DIR}/bgc/bgc13062014"
+RESFAM_HMM="${MG_TRAITS_RESOURCES}/Resfams.hmm"
+PFAM_MODEL_DIR="${MG_TRAITS_RESOURCES}/model_uproc_pfam"
+PFAM_DB="${MG_TRAITS_RESOURCES}/pfam28_db"
+BGC_MODEL_DIR="${MG_TRAITS_RESOURCES}/model_uproc_bgc"
+BGC_DB="${MG_TRAITS_RESOURCES}/bgc13062014"
+CAZ_HMM="${MG_TRAITS_RESOURCES}/dbCAN-HMMdb-V9.txt"
 
 # tools
 # bbduk
@@ -26,16 +26,14 @@ pear_version="0.9.8"
 pear="${BIN}/pear/pear-${pear_version}/bin/pear"
 
 # fraggenescan
-fraggenescanplusplus="${BIN}/FragGeneScan/FragGeneScanPlusPlus-master/FGSpp"
-TRAIN="${BIN}/FragGeneScan/FragGeneScanPlusPlus-master/train"
+fraggenescanplusplus="${BIN}/fraggenescan/FragGeneScanPlusPlus-master/FGSpp"
+TRAIN="${BIN}/fraggenescan/FragGeneScanPlusPlus-master/train"
 fraggenescan_version="1.31"
-fraggenescan="${BIN}/FragGeneScan/FragGeneScan-${fraggenescan_version}/run_FragGeneScan.pl"
+fraggenescan="${BIN}/fraggenescan/FragGeneScan-${fraggenescan_version}/run_FragGeneScan.pl"
 
 #uproc
 uproc_version="1.2.0"
 uproc_prot="${BIN}/uproc/uproc-${uproc_version}/uproc-prot"
-MODEL_DIR="${RESOURCES_DIR}/pfam/uproc/model"
-DB="${RESOURCES_DIR}/pfam/uproc/pfam28_db"
 
 # emboss
 infoseq="/usr/bin/infoseq"
