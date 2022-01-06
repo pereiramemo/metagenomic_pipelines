@@ -12,7 +12,7 @@ mg_traits_lite_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./preprocess_pipeline.bash <options>
+Usage: ./module4_tax_mg_traits.bash <options>
 --help                          print this help
 --confidence NUM                confidence value to run rdp bayes classifier (from 0 to 1; default 0.5)
 --evalue NUM                    e-value used to filter rRNA seqs
@@ -251,7 +251,7 @@ fi
 
 ###############################################################################
 # 9. Format taxa annot output
-#############################   ##################################################
+###############################################################################
 
 awk -v FS="\t" -v OFS="\t" -v s="${SAMPLE_NAME}" '{ 
 

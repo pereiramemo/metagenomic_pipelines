@@ -12,7 +12,7 @@ mg_traits_lite_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./preprocess_pipeline.bash <options>
+Usage: ./module1_nuc_mg_traits.bash <options>
 --help                          print this help
 --input_file CHAR               input workable fasta file
 --nslots NUM                    number of threads used (default 12)

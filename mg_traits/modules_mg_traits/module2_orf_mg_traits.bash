@@ -12,7 +12,7 @@ mg_traits_lite_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./preprocess_pipeline.bash <options>
+Usage: ./module2_orf_mg_traits.bash <options>
 --help                          print this help
 --input_file CHAR               input workable fasta file
 --nslots NUM                    number of threads used (default 12)
@@ -114,92 +114,92 @@ done
 ###############################################################################
 # 4. Create outpt directory
 ###############################################################################
-# 
-# mkdir "${OUTPUT_DIR}"
-# if [[ $? -ne 0 ]]; then
-#   echo "mkdir ${OUTPUT_DIR} failed"
-#   exit 1
-# fi  
-# 
-# ###############################################################################
-# # 5 Predict ORFs
-# ###############################################################################
-# 
-# "${fraggenescan}" \
-# -genome="${INPUT_FILE}" \
-# -out="${OUTPUT_DIR}/${SAMPLE_NAME}" \
-# -complete 0 \
-# -train "${TRAIN_FILE_NAME}" \
-# -thread "${NSLOTS}"
-# 
-# if [[ $? -ne 0 ]]; then
-#   echo "${fraggenescan} failed"
-#   exit 1
-# fi  
-# 
-# ###############################################################################
-# # 6. Run cusp
-# ###############################################################################
-# 
-# "${cusp}" \
-# -sequence "${OUTPUT_DIR}/${SAMPLE_NAME}.ffn" \
-# -outfile "${OUTPUT_DIR}/${SAMPLE_NAME}.cusp" \
-# -sbegin1 1
-# 
-# if [[ $? -ne "0" ]]; then
-#   echo "${cusp} failed"
-#   exit 1
-# fi  
-# 
-# ###############################################################################
-# # 7. Create codon freq table
-# ###############################################################################
-# 
-# awk -v s="${SAMPLE_NAME}" '{
-#   if ($0 !~ /\#/ && $0 !~ "*" && $0 !~ /^$/){ 
-#     array[$1]=$5
-#     total = $5 + total
-#   }
-# } END { 
-# 
-#   for (c in array) { 
-#     prop = array[c]/total
-#     printf "%s\t%s\t%.10f\n", s,c,prop
-#   }
-# 
-# }' \
-# "${OUTPUT_DIR}/${SAMPLE_NAME}.cusp" > \
-# "${OUTPUT_DIR}/${SAMPLE_NAME}_codon_comp.tsv"
-# 
-# if [[ $? -ne "0" ]]; then
-#   echo "awk formatting cusp file to codon comp failed"
-#   exit 1
-# fi  
-# 
-# ###############################################################################
-# # 8. Create aa freq table
-# ###############################################################################
-# 
-# awk -v s="${SAMPLE_NAME}" '{
-#   if ($0 !~ /\#/ && $0 !~ "*" && $0 !~ /^$/){ 
-#     array[$2] = $5 + array[$2]
-#     total = $5 + total
-#   }
-# } END { 
-# 
-#   for (c in array) { 
-#     prop = array[c]/total
-#     printf "%s\t%s\t%.10f\n", s,c,prop
-#   }
-# 
-# }' \
-# "${OUTPUT_DIR}/${SAMPLE_NAME}.cusp" > \
-# "${OUTPUT_DIR}/${SAMPLE_NAME}_aa_comp.tsv"
-# 
-# if [[ $? -ne "0" ]]; then
-#   echo "awk formatting cusp file to aa comp failed"
-#   exit 1
-# fi  
+
+mkdir "${OUTPUT_DIR}"
+if [[ $? -ne 0 ]]; then
+  echo "mkdir ${OUTPUT_DIR} failed"
+  exit 1
+fi  
+
+###############################################################################
+# 5 Predict ORFs
+###############################################################################
+
+"${fraggenescan}" \
+-genome="${INPUT_FILE}" \
+-out="${OUTPUT_DIR}/${SAMPLE_NAME}" \
+-complete 0 \
+-train "${TRAIN_FILE_NAME}" \
+-thread "${NSLOTS}"
+
+if [[ $? -ne 0 ]]; then
+  echo "${fraggenescan} failed"
+  exit 1
+fi  
+
+###############################################################################
+# 6. Run cusp
+###############################################################################
+
+"${cusp}" \
+-sequence "${OUTPUT_DIR}/${SAMPLE_NAME}.ffn" \
+-outfile "${OUTPUT_DIR}/${SAMPLE_NAME}.cusp" \
+-sbegin1 1
+
+if [[ $? -ne "0" ]]; then
+  echo "${cusp} failed"
+  exit 1
+fi  
+
+###############################################################################
+# 7. Create codon freq table
+###############################################################################
+
+awk -v s="${SAMPLE_NAME}" '{
+  if ($0 !~ /\#/ && $0 !~ "*" && $0 !~ /^$/){ 
+    array[$1]=$5
+    total = $5 + total
+  }
+} END { 
+
+  for (c in array) { 
+    prop = array[c]/total
+    printf "%s\t%s\t%.10f\n", s,c,prop
+  }
+
+}' \
+"${OUTPUT_DIR}/${SAMPLE_NAME}.cusp" > \
+"${OUTPUT_DIR}/${SAMPLE_NAME}_codon_comp.tsv"
+
+if [[ $? -ne "0" ]]; then
+  echo "awk formatting cusp file to codon comp failed"
+  exit 1
+fi  
+
+###############################################################################
+# 8. Create aa freq table
+###############################################################################
+
+awk -v s="${SAMPLE_NAME}" '{
+  if ($0 !~ /\#/ && $0 !~ "*" && $0 !~ /^$/){ 
+    array[$2] = $5 + array[$2]
+    total = $5 + total
+  }
+} END { 
+
+  for (c in array) { 
+    prop = array[c]/total
+    printf "%s\t%s\t%.10f\n", s,c,prop
+  }
+
+}' \
+"${OUTPUT_DIR}/${SAMPLE_NAME}.cusp" > \
+"${OUTPUT_DIR}/${SAMPLE_NAME}_aa_comp.tsv"
+
+if [[ $? -ne "0" ]]; then
+  echo "awk formatting cusp file to aa comp failed"
+  exit 1
+fi  
 
 ###############################################################################
 # 9. Compute acidic to basic ratio

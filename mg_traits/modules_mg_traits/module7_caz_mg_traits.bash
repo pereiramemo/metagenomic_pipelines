@@ -12,7 +12,7 @@ mg_traits_lite_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./preprocess_pipeline.bash <options>
+Usage: ./module7_caz_mg_traits.bash <options>
 --help                          print this help
 --input_file CHAR               input workable fasta file
 --evalue NUM                    sequences e-value in hmmsearch

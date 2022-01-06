@@ -12,7 +12,7 @@ mg_traits_lite_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./preprocess_pipeline.bash <options>
+Usage: ././module3_fun_mg_traits.bash <options>
 --help                          print this help
 --num_genes NUM                 total number of orf ffn (or faa) sequences
 --input_file CHAR               input workable fasta file

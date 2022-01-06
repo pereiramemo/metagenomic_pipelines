@@ -12,7 +12,7 @@ mg_traits_lite_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./module5_res_mg_traits.bash <options>
+Usage: ./module3.2_fun_mg_traits.bash <options>
 --help                          print this help
 --input_file CHAR               input workable fasta file
 --evalue NUM                    sequences e-value in hmmsearch
@@ -136,7 +136,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 ###############################################################################
-# 5. Annotate resfam
+# 5. Annotate pfam
 ###############################################################################
 
 "${hmmsearch}" \
@@ -144,7 +144,7 @@ fi
 --noali \
 -E 1 \
 --cpu "${NSLOTS}" \
-"${RESFAM_HMM}" "${INPUT_FILE}" > ${OUTPUT_DIR}/"${SAMPLE_NAME}.hout"
+"${PFAM_HMM}" "${INPUT_FILE}" > ${OUTPUT_DIR}/"${SAMPLE_NAME}.hout"
 
 if [[ $? -ne "0" ]]; then
   echo "${hmmsearch} failed"
@@ -152,7 +152,7 @@ if [[ $? -ne "0" ]]; then
 fi  
 
 ###############################################################################
-# 6. Format resfam annotation
+# 6. Format pfam annotation
 ###############################################################################
 
 awk -v s="${SAMPLE_NAME}" -v  e="${EVALUE}" -v OFS="\t" '{ 
@@ -166,17 +166,17 @@ awk -v s="${SAMPLE_NAME}" -v  e="${EVALUE}" -v OFS="\t" '{
     print s,i,array_annot[i]
   }
 }' "${OUTPUT_DIR}/${SAMPLE_NAME}.domtblout" > \
-   "${OUTPUT_DIR}/${SAMPLE_NAME}_res_annot.tsv"
+   "${OUTPUT_DIR}/${SAMPLE_NAME}_pfam_annot.tsv"
 
 if [[ $? -ne "0" ]]; then
-  echo "awk format resfam annotation failed"
+  echo "awk format pfam annotation failed"
   exit 1
 fi  
    
 # note: the independent evalue is used to select significant domains   
    
 ###############################################################################
-# 7. Compute resfam diversity
+# 7. Compute pfam diversity
 ###############################################################################
 
 awk -v s="${SAMPLE_NAME}" -v OFS="\t" -v FS="\t" '{ 
@@ -192,11 +192,11 @@ awk -v s="${SAMPLE_NAME}" -v OFS="\t" -v FS="\t" '{
   }
   print s,"shannon",shannon
   print s,"richness",richness
-}' "${OUTPUT_DIR}/${SAMPLE_NAME}_res_annot.tsv" > \
-"${OUTPUT_DIR}/${SAMPLE_NAME}_res_stats.tsv"
+}' "${OUTPUT_DIR}/${SAMPLE_NAME}_pfam_annot.tsv" > \
+"${OUTPUT_DIR}/${SAMPLE_NAME}_pfam_stats.tsv"
 
 if [[ $? -ne "0" ]]; then
-  echo "awk compute resfam diversity failed"
+  echo "awk compute pfam diversity failed"
   exit 1
 fi  
 
@@ -213,8 +213,8 @@ awk -v s="${SAMPLE_NAME}" -v FS="\t" -v OFS="\t" -v n="${NUM_GENES}" '{
   perc_annot = 100*total/n
   print s,"perc_annot", perc_annot
   
-}' "${OUTPUT_DIR}/${SAMPLE_NAME}_res_annot.tsv" >> \
-   "${OUTPUT_DIR}/${SAMPLE_NAME}_res_stats.tsv"
+}' "${OUTPUT_DIR}/${SAMPLE_NAME}_pfam_annot.tsv" >> \
+   "${OUTPUT_DIR}/${SAMPLE_NAME}_pfam_stats.tsv"
             
 if [[ $? -ne "0" ]]; then
   echo "awk compute percentage of annotated reads failed"
