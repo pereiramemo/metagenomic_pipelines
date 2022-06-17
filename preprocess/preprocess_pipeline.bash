@@ -3,7 +3,7 @@
 ###############################################################################
 
 set -o pipefail 
-source "${HOME}/workspace/repositories/metagenomic_pipelines/preprocess/\
+source "${HOME}/workspace/repositories/tools/metagenomic_pipelines/preprocess/\
 preprocess_pipeline_conf.bash"
 
 ###############################################################################

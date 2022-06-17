@@ -1,7 +1,7 @@
 # dirs
 BIN="/home/bioinf/bin"
 LOCAL="/home/epereira/.local/"
-PREPROCESS_DIR="${HOME}/workspace/repositories/metagenomic_pipelines/preprocess"
+PREPROCESS_DIR="${HOME}/workspace/repositories/tools/metagenomic_pipelines/preprocess"
 
 # tools
 bbmap_version="38.79"
@@ -16,6 +16,7 @@ bzip2="/bin/bzip2"
 gunzip="/bin/gunzip"
 fq2fa="${PREPROCESS_DIR}/resources/fq2fa.sh"
 plots="${PREPROCESS_DIR}/resources/plots.R"
+quality_check_plots="${PREPROCESS_DIR}/resources/quality_check_plots.R"
 
 # files
 ADAPTERS="${BIN}/bbmap/bbmap-${bbmap_version}/resources/adapters.fa"
