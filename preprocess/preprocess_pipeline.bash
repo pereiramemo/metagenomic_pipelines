@@ -265,6 +265,11 @@ if [[ ! -a "${R1}" || ! -a "${R2}" ]]; then
   exit 1
 fi
 
+if [[ "${OUTPUT_MERGED}" == "f" && "${OUTPUT_PE}" == "f" ]]; then
+  echo "Output mode was not selected; use --output_merged t or --output_pe t"
+  exit 0
+fi
+
 ###############################################################################
 ### 5. Define defaults
 ###############################################################################
