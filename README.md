@@ -20,7 +20,8 @@ Optionally, the pipeline can be used to produce quality checked paired-end reads
 ```
 Usage: ./preprocess_pipeline.bash <options>
 --help                          print this help  
---clean t|f                     remove all intermediate files  
+--clean t|f                     remove all intermediate files (default f)
+--compress t|f                  output data as .gz files (default f)  
 --merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")  
 --min_qual NUM                  minimum quality score to trim reads (default 20)  
 --min_overlap NUM               minimum overlap to merge paired-end reads with pear  
