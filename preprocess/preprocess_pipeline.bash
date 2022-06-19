@@ -14,7 +14,8 @@ show_usage(){
   cat <<EOF
 Usage: ./preprocess_pipeline.bash <options>
 --help                          print this help
---clean t|f                     remove all intermediate files
+--clean t|f                     remove all intermediate files (default f)
+--compress t|f                  output data as .gz files (default f)
 --merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")
 --min_qual NUM                  minimum quality score to trim reads (default 20)
 --min_overlap NUM               minimum overlap to merge paired-end reads with pear
@@ -55,6 +56,19 @@ while :; do
   --clean=) # Handle the empty case
   printf 'Using default environment.\n' >&2
   ;;
+#############
+  --compress)
+  if [[ -n "${2}" ]]; then
+    COMPRESS="${2}"
+    shift
+  fi
+  ;;
+  --compress=?*)
+  COMPRESS="${1#*=}" # Delete everything up to "=" and assign the remainder.
+  ;;
+  --compress=) # Handle the empty case
+  printf 'Using default environment.\n' >&2
+  ;;  
 #############
   --merger)
   if [[ -n "${2}" ]]; then
@@ -278,6 +292,10 @@ if [[ -z "${CLEAN}" ]]; then
   CLEAN="f"
 fi
 
+if [[ -z "${COMPRESS}" ]]; then
+  COMPRESS="f"
+fi
+
 if [[ -z "${MERGER}" ]]; then
   MERGER="pear"
 fi
@@ -338,9 +356,22 @@ fi
 if [[ "${OVERWRITE}" == "t" ]]; then
 
   if [[ -d "${OUTPUT_DIR}" ]]; then
+  
     rm -r "${OUTPUT_DIR}"
+    
+    if [[ $? -ne "0" ]]; then
+      echo "rm -r ${OUTPUT_DIR} failed"
+      exit 1
+    fi
+    
   fi
+  
    mkdir -p "${OUTPUT_DIR}"
+   
+   if [[ $? -ne "0" ]]; then
+     echo "mkdir -p ${OUTPUT_DIR} failed"
+     exit 1
+   fi  
   
 fi
 
@@ -350,9 +381,15 @@ if [[ "${OVERWRITE}" == "f" ]]; then
     echo "${OUTPUT_DIR} already exists"
     exit 1
   else
-    mkdir -p "${OUTPUT_DIR}"
-  fi
   
+    mkdir -p "${OUTPUT_DIR}"
+    
+    if [[ $? -ne "0" ]]; then
+     echo "mkdir -p ${OUTPUT_DIR} failed"
+     exit 1
+    fi
+
+  fi  
 fi  
 
 ###############################################################################
@@ -533,6 +570,17 @@ if [[ "${OUTPUT_PE}" == "t" ]]; then
     echo "bbduk quality trimming paired-end reads failed"
     exit 1
   fi  
+  
+  if [[ "${COMPRESS}" == "t" ]]; then
+  
+    "${pigz}" --keep --processes "${NSLOTS}" "${R1_QC}" "${R2_QC}"
+    
+    if [[ $? -ne 0 ]]; then
+      echo "pigz compressing "${R1_QC}" and "${R2_QC}" failed"
+      exit 1
+    fi
+    
+  fi  
 fi
 
 ###############################################################################
@@ -664,7 +712,18 @@ if [[ "${OUTPUT_MERGED}" == "t" ]]; then
     echo "fq2fa merged reads failed"
     exit 1
   fi
-
+  
+  if [[ "${COMPRESS}" == "t" ]]; then
+  
+    "${pigz}" --keep --processes "${NSLOTS}" "${R_ASSEM_QC_FA}" 
+    
+    if [[ $? -ne 0 ]]; then
+      echo "pigz compressing "${R_ASSEM_QC_FA}" failed"
+      exit 1
+    fi
+  
+  fi
+  
   if [[ -s "${R1_UNASSEM_QC}" ]]; then
  
     R1_UNASSEM_QC_FA="${OUTPUT_DIR}/${SAMPLE_NAME}_unassembled_R1_qc-03.fasta"
@@ -684,8 +743,17 @@ if [[ "${OUTPUT_MERGED}" == "t" ]]; then
       exit 1
     fi
     
-  fi
+    if [[ "${COMPRESS}" == "t" ]]; then
   
+      "${pigz}" --keep --processes "${NSLOTS}" "${R1_UNASSEM_QC_FA}" "${R2_UNASSEM_QC_FA}" 
+    
+      if [[ $? -ne 0 ]]; then
+        echo "pigz compressing ${R1_UNASSEM_QC_FA} ${R2_UNASSEM_QC_FA} failed"
+        exit 1
+      fi
+      
+    fi
+  fi
 fi
 
 ###############################################################################
@@ -740,6 +808,12 @@ fi
 
 rm "${OUTPUT_DIR}/stats_tmp.tsv"
 
+if [[ $? -ne 0 ]]; then
+  echo "rm stats_tmp.tsv file failed"
+  exit 1
+fi
+
+
 ###############################################################################
 ### 16. Plot stats
 ###############################################################################
@@ -790,19 +864,43 @@ if [[ "${CLEAN}" == "t" ]]; then
       echo "rm R1_AT and R2_AT files failed"
       exit 1
     fi
+    
+  fi
+  
+  if [[ "${OUTPUT_PE}" == "t" ]]; then
+    if [[ "${COMPRESS}" == "t" ]]; then
+      
+      rm "${R1_QC}" "${R2_QC}"
+      
+      if [[ $? -ne 0 ]]; then
+        echo "rm fastq files failed"
+        exit 1
+      fi 
+      
+    fi    
   fi
   
   if [[ "${OUTPUT_MERGED}" == "t" ]]; then
   
-    rm "${R_ASSEM}" "${R1_UNASSEM}" "${R2_UNASSEM}" "${R_DISCARD}"
-    rm "${R_ASSEM_QC}" "${R1_UNASSEM_QC}" "${R2_UNASSEM_QC}"
+    rm "${R_ASSEM}" "${R1_UNASSEM}" "${R2_UNASSEM}" "${R_DISCARD}" \
+       "${R_ASSEM_QC}" "${R1_UNASSEM_QC}" "${R2_UNASSEM_QC}"
     
     if [[ $? -ne 0 ]]; then
       echo "rm intermediate files failed"
       exit 1
     fi
     
-  fi
+    if [[ "${COMPRESS}" == "t" ]]; then
+    
+      rm "${R1_UNASSEM_QC_FA}" "${R2_UNASSEM_QC_FA}" "${R_ASSEM_QC_FA}"
+      
+      if [[ $? -ne 0 ]]; then
+        echo "rm fasta files failed"
+        exit 1
+      fi
+      
+    fi 
+  fi  
 fi
 
 ###############################################################################
@@ -810,7 +908,27 @@ fi
 ###############################################################################
 
 if [[ "${OUTPUT_MERGED}" == "t" ]]; then
-  mv "${R_ASSEM_QC_FA}" "${OUTPUT_DIR}/${SAMPLE_NAME}_workable.fasta"
+  if [[ "${COMPRESS}" == "t" ]]; then
+  
+    mv "${R_ASSEM_QC_FA}".gz "${OUTPUT_DIR}/${SAMPLE_NAME}_workable.fasta.gz"
+    
+    if [[ $? -ne 0 ]]; then
+      echo "rename to workable failed"
+      exit 1
+    fi
+    
+  fi  
+   
+  if [[ "${COMPRESS}" == "f" ]]; then 
+  
+   mv "${R_ASSEM_QC_FA}""${OUTPUT_DIR}/${SAMPLE_NAME}_workable.fasta"
+   
+    if [[ $? -ne 0 ]]; then
+      echo "rename to workable failed"
+      exit 1
+    fi
+    
+  fi 
 fi
 
 ###############################################################################
