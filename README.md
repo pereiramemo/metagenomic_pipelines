@@ -1,5 +1,5 @@
 # Metagenomic pipelines
-This repository contains the code to preprocess and analyze metagenomic data, organized in two different pipelines: **preprocess_pipeline.bash**, and **mg_traits_lite.bash**. 
+This repository contains the code to preprocess and analyze metagenomic data, organized in two different pipelines: **preprocess_pipeline.sh**, and **mg_traits_lite.sh**. 
 
 1. The folder **preprocess** contains a pipeline programmed in BASH, that can be executed from the command line to preprocess raw Illumina paired-end reads obtained from metagenomic samples (named [preprocess_pipeline.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline.bash)). The main tasks consist of checking for the presence of adapters, merging the paired-end reads, and quality trimming the merged and unmerged reads. It additionally computes and plots the number of reads and mean read length of the intermediate files to trace the preprocessing tasks and detect potential irregularities. The output consists of a fasta file (i.e., ```*workable.fasta```), ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files (i.e., ```stats.tsv``` and ```stats_plots.png```).  
 Optionally, the pipeline can be used to produce quality checked paired-end reads.
@@ -13,12 +13,12 @@ Optionally, the pipeline can be used to produce quality checked paired-end reads
 [R](https://www.r-project.org)  
 [tidyverse](https://www.tidyverse.org) R package  
 
-    Once these tools are installed, the [preprocess_pipeline_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.bash) has to be edited to set the correct paths.
+    Once these tools are installed, the [preprocess_pipeline_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.sh) has to be edited to set the correct paths.
 
-    To see the help run ```./preprocess_pipeline.bash --help```
+    To see the help run ```./preprocess_pipeline.sh --help```
 
 ```
-Usage: ./preprocess_pipeline.bash <options>
+Usage: ./preprocess_pipeline.sh <options>
 --help                          print this help  
 --clean t|f                     remove all intermediate files (default f)
 --compress t|f                  output data as .gz files (default f)  
@@ -55,9 +55,9 @@ Usage: ./preprocess_pipeline.bash <options>
 [tidyverse](https://www.tidyverse.org) R package  
 
 
-    Similarly as mentioned above, once these tools are installed the configuration file [mg_traits_lite_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite_conf.bash) has to be edited to set the correct paths to define the variables.
+    Similarly as mentioned above, once these tools are installed the configuration file [mg_traits_lite_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite_conf.sh) has to be edited to set the correct paths to define the variables.
 
-    To see the help run ```./mg_traits_lite.bash --help```  
+    To see the help run ```./mg_traits_lite.sh --help```  
 
 
 ```
