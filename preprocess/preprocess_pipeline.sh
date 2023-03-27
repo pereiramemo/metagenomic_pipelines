@@ -4,7 +4,7 @@
 
 set -o pipefail 
 source "${HOME}/workspace/repositories/tools/metagenomic_pipelines/preprocess/\
-preprocess_pipeline_conf.bash"
+preprocess_pipeline_conf.sh"
 
 ###############################################################################
 # 2. Define help
@@ -12,7 +12,7 @@ preprocess_pipeline_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./preprocess_pipeline.bash <options>
+Usage: ./preprocess_pipeline.sh <options>
 --help                          print this help
 --clean t|f                     remove all intermediate files (default f)
 --compress t|f                  output data as .gz files (default f)
