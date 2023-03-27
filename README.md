@@ -19,23 +19,25 @@ Optionally, the pipeline can be used to produce quality checked paired-end reads
 
 ```
 Usage: ./preprocess_pipeline.sh <options>
---help                          print this help  
+--help                          print this help
 --clean t|f                     remove all intermediate files (default f)
---compress t|f                  output data as .gz files (default f)  
---merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")  
---min_qual NUM                  minimum quality score to trim reads (default 20)  
---min_overlap NUM               minimum overlap to merge paired-end reads with pear  
---nslots NUM                    number of threads used (default 12)  
---output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)  
---output_pe t|f                 output quality checked paired-end reads as fastq files (default f)  
---output_merged t|f             output quality checked merged reads as fasta files (i.e., workable.fasta) (default t)  
+--compress t|f                  output data as .gz files (default f)
+--merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")
+--min_length NUM                minimum length of (PE or merged) reads (default 75)
+--min_overlap NUM               minimum overlap to merge paired-end reads with pear
+--min_qual NUM                  minimum quality score to trim reads (default 20)
+--nslots NUM                    number of threads used (default 12)
+--output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)
+--output_pe t|f                 output quality checked paired-end reads as fastq files (default f)
+--output_merged t|f             output quality checked merged reads as fasta file (i.e., workable.fasta) (default t)
 --overwrite t|f                 overwrite previous directory (default f)
---pvalue NUM                    p value used to run pear. See pear help for valid p values (default: 0.01)  
---reads CHAR                    input R1 reads  
---reads2 CHAR                   input R2 reads  
---sample_name CHAR              sample name (default metagenomex)  
---subsample t|f                 subsample metagenome to 10K to test execution (default f)  
---trim_adapters t|f             check for adapters and trim (default f)  
+--pvalue NUM                    p value used to run pear. See pear help for valid p values (default: 0.01)
+--plot t|f                      create statistics barplot (default f)
+--reads CHAR                    input R1 reads
+--reads2 CHAR                   input R2 reads
+--sample_name CHAR              sample name (default metagenomex)
+--subsample t|f                 subsample metagenome to 10K to test execution (default f)
+--trim_adapters t|f             check for adapters and trim (default f)
 ```
 
 2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.sh). This tool is a command line application programmed in BASH, AWK, and R, dedicated to the computation of
