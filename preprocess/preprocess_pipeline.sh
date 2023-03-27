@@ -17,14 +17,16 @@ Usage: ./preprocess_pipeline.sh <options>
 --clean t|f                     remove all intermediate files (default f)
 --compress t|f                  output data as .gz files (default f)
 --merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")
---min_qual NUM                  minimum quality score to trim reads (default 20)
+--min_length NUM                minimum length of (PE or merged) reads (default 75)
 --min_overlap NUM               minimum overlap to merge paired-end reads with pear
+--min_qual NUM                  minimum quality score to trim reads (default 20)
 --nslots NUM                    number of threads used (default 12)
 --output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)
 --output_pe t|f                 output quality checked paired-end reads as fastq files (default f)
 --output_merged t|f             output quality checked merged reads as fasta file (i.e., workable.fasta) (default t)
 --overwrite t|f                 overwrite previous directory (default f)
 --pvalue NUM                    p value used to run pear. See pear help for valid p values (default: 0.01)
+--plot t|f                      create statistics barplot (default f)
 --reads CHAR                    input R1 reads
 --reads2 CHAR                   input R2 reads
 --sample_name CHAR              sample name (default metagenomex)
@@ -95,6 +97,19 @@ while :; do
   --min_overlap=) # Handle the empty case
   printf 'Using default environment.\n' >&2
   ;;    
+#############
+  --min_length)
+  if [[ -n "${2}" ]]; then
+    MIN_LENGTH="${2}"
+    shift
+  fi
+  ;;
+  --min_length=?*)
+  MIN_LENGTH="${1#*=}" # Delete everything up to "=" and assign the remainder.
+  ;;
+  --min_length=) # Handle the empty case
+  printf 'Using default environment.\n' >&2
+  ;;
 #############
   --min_qual)
   if [[ -n "${2}" ]]; then
@@ -173,6 +188,19 @@ while :; do
   --output_merged=) # Handle the empty case
   printf 'Using default environment.\n' >&2
   ;;    
+#############
+  --plot)
+  if [[ -n "${2}" ]]; then
+    PLOT="${2}"
+    shift
+  fi
+  ;;
+  --plot=?*)
+  PLOT="${1#*=}" # Delete everything up to "=" and assign the remainder.
+  ;;
+  --plot=) # Handle the empty case
+  printf 'Using default environment.\n' >&2
+  ;;
 #############
   --pvalue)
   if [[ -n "${2}" ]]; then
@@ -300,6 +328,10 @@ if [[ -z "${MERGER}" ]]; then
   MERGER="pear"
 fi
 
+if [[ -z "${MIN_LENGTH}" ]]; then
+  MIN_LENGTH="75"
+fi 
+
 if [[ -z "${MIN_OVERLAP}" ]]; then
   MIN_OVERLAP="10"
 fi 
@@ -323,6 +355,10 @@ fi
 if [[ -z "${OUTPUT_PE}" ]]; then
   OUTPUT_PE="f"
 fi
+
+if [[ -z "${PLOT}" ]]; then
+  PLOT="f"
+fi  
 
 if [[ -z "${PVALUE}" ]]; then
   PVALUE="0.01"
@@ -561,7 +597,7 @@ if [[ "${OUTPUT_PE}" == "t" ]]; then
   in2="${R2}" \
   out="${R1_QC}" \
   out2="${R2_QC}" \
-  minlength=50 \
+  minlength="${MIN_LENGTH}" \
   threads="${NSLOTS}" \
   qtrim=rl \
   trimq="${MIN_QUAL}"
@@ -662,7 +698,7 @@ if [[ "${OUTPUT_MERGED}" == "t" ]]; then
   "${bbduk}" \
   in="${R_ASSEM}" \
   out="${R_ASSEM_QC}" \
-  minlength=50 \
+  minlength="${MIN_LENGTH}" \
   threads="${NSLOTS}" \
   qtrim=rl \
   trimq="${MIN_QUAL}"
@@ -815,20 +851,24 @@ fi
 
 
 ###############################################################################
-### 16. Plot stats
+## # 16. Plot stats
 ###############################################################################
 
-echo "creating plot ..."
+if [[ "${PLOT}" == t ]]; then
 
-Rscript --vanilla \
-"${plots}" \
-"${OUTPUT_DIR}/stats.tsv" \
-"${OUTPUT_DIR}/stats_plots.png"
+  echo "creating plot ..."
 
-if [[ $? -ne 0 ]]; then
-  echo "R plotting failed"
-  exit 1
-fi
+  Rscript --vanilla \
+  "${plots}" \
+  "${OUTPUT_DIR}/stats.tsv" \
+  "${OUTPUT_DIR}/stats_plots.png"
+
+  if [[ $? -ne 0 ]]; then
+    echo "R plotting failed"
+    exit 1
+  fi
+fi  
+  
 
 ###############################################################################
 ### 17. Clean
