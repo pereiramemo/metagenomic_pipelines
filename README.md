@@ -13,7 +13,7 @@ Optionally, the pipeline can be used to produce quality checked paired-end reads
 [R](https://www.r-project.org)  
 [tidyverse](https://www.tidyverse.org) R package  
 
-    Once these tools are installed, the [preprocess_pipeline_conf.bash](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.sh) has to be edited to set the correct paths.
+    Once these tools are installed, the [preprocess_pipeline_conf.sh](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.sh) has to be edited to set the correct paths.
 
     To see the help run ```./preprocess_pipeline.sh --help```
 
@@ -38,7 +38,7 @@ Usage: ./preprocess_pipeline.sh <options>
 --trim_adapters t|f             check for adapters and trim (default f)  
 ```
 
-2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.bash). This tool is a command line application programmed in BASH, AWK, and R, dedicated to the computation of
+2. The folder **mg_traits** contains the pipeline [mg_traits_lite](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/mg_traits/mg_traits_lite.sh). This tool is a command line application programmed in BASH, AWK, and R, dedicated to the computation of
 29 (and counting) metagenomic traits, ranging from GC variance and amino acid composition to functional diversity and average genome size. It takes as an input a preprocessed (unassembled) metagenomic sample and outputs the computed metagenomic traits organized in different tables and grouped in separate folders according to the type of data source
 (see [Fig. 1](#figure1)). 
 
@@ -61,7 +61,7 @@ Usage: ./preprocess_pipeline.sh <options>
 
 
 ```
-Usage: ./mg_traits_lite.bash <options>
+Usage: ./mg_traits_lite.sh <options>
 --help                          print this help
 --clean t|f                     remove all intermediate files
 --confidence NUM                confidence value to run rdp bayes classifier (from 0 to 100; default 50)
