@@ -3,7 +3,7 @@
 ###############################################################################
 
 set -o pipefail 
-source "${HOME}/workspace/repositories/metagenomic_pipelines/mg_traits/\
+source "${HOME}/workspace/repositories/tools/metagenomic_pipelines/mg_traits/\
 mg_traits_lite_conf.bash"
 
 ###############################################################################
@@ -421,10 +421,7 @@ if [[ $? -ne "0" ]]; then
 fi  
 
 # clean
-rm "${OUTPUT_DIR}/ags/${SAMPLE_NAME}_orfs.faa" \
-   "${OUTPUT_DIR}/ags/${SAMPLE_NAME}_orfs.ffn" \
-   "${OUTPUT_DIR}/ags/${SAMPLE_NAME}_orfs.out" \
-   "${OUTPUT_DIR}/ags/${SAMPLE_NAME}_orfs.gff"
+rm "${OUTPUT_DIR}/ags/${SAMPLE_NAME}_orfs.faa" 
 
 if [[ $? -ne "0" ]]; then
   echo "cleaning ags orfs output failed"
@@ -590,7 +587,32 @@ if [[ $? -ne 0 ]]; then
 fi  
 
 ###############################################################################
-### 17. Exit status
+### 17. Compress large files
+###############################################################################
+
+"${pigz}" --processes "${NSLOTS}" "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.faa"
+
+if [[ $? -ne 0 ]]; then
+  echo "compressing file ${SAMPLE_NAME}.faa failed"
+  exit 1
+fi 
+
+"${pigz}" --processes "${NSLOTS}" "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.ffn"
+
+if [[ $? -ne 0 ]]; then
+  echo "compressing file ${SAMPLE_NAME}.ffn failed"
+  exit 1
+fi 
+
+"${pigz}" --processes "${NSLOTS}" "${OUTPUT_DIR}/nuc/${SAMPLE_NAME}.info"
+
+if [[ $? -ne 0 ]]; then
+  echo "compressing file ${SAMPLE_NAME}.info failed"
+  exit 1
+fi 
+
+###############################################################################
+### 18. Exit status
 ###############################################################################
 
 echo "exited with 0 errors"
