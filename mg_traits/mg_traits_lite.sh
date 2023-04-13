@@ -3,8 +3,7 @@
 ###############################################################################
 
 set -o pipefail 
-source "${HOME}/workspace/repositories/tools/metagenomic_pipelines/mg_traits/\
-mg_traits_lite_conf.bash"
+source "${HOME}/workspace/repositories/tools/metagenomic_pipelines/mg_traits/conf.sh"
 
 ###############################################################################
 # 2. Define help
@@ -12,7 +11,7 @@ mg_traits_lite_conf.bash"
 
 show_usage(){
   cat <<EOF
-Usage: ./mg_traits_lite.bash <options>
+Usage: ./mg_traits_lite.sh <options>
 --help                          print this help
 --clean t|f                     remove all intermediate files
 --confidence NUM                confidence value to run rdp bayes classifier (from 0 to 100; default 50)
@@ -351,13 +350,13 @@ fi
 
 echo -e "\ncomputing nucleotide mg_traits ...\n"
 
-"${MG_TRAITS_DIR}/modules_mg_traits/module1_nuc_mg_traits.bash" \
+"${MG_TRAITS_DIR}/modules_mg_traits/module1_nuc_mg_traits.sh" \
 --input_file "${INPUT_FILE}" \
 --output_dir "${OUTPUT_DIR}/nuc" \
 --sample_name "${SAMPLE_NAME}"
 
 if [[ $? -ne 0 ]]; then
-  echo "module1_nuc_mg_traits.bash failed"
+  echo "module1_nuc_mg_traits.sh failed"
   exit 1
 fi  
 
@@ -367,7 +366,7 @@ fi
 
 echo -e "\ncomputing orf mg_traits ...\n"
 
-"${MG_TRAITS_DIR}/modules_mg_traits/module2_orf_mg_traits.bash" \
+"${MG_TRAITS_DIR}/modules_mg_traits/module2_orf_mg_traits.sh" \
 --input_file "${INPUT_FILE}" \
 --output_dir "${OUTPUT_DIR}/orf" \
 --sample_name "${SAMPLE_NAME}" \
@@ -375,7 +374,7 @@ echo -e "\ncomputing orf mg_traits ...\n"
 --train_file_name "${TRAIN_FILE_NAME}"
 
 if [[ $? -ne 0 ]]; then
-  echo "module2_orf_mg_traits.bash failed"
+  echo "module2_orf_mg_traits.sh failed"
   exit 1
 fi  
 
@@ -387,7 +386,7 @@ echo -e "\ncomputing function mg_traits ...\n"
 
 NUM_GENES=$(egrep -c ">" "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.ffn")
 
-"${MG_TRAITS_DIR}/modules_mg_traits/module3_fun_mg_traits.bash" \
+"${MG_TRAITS_DIR}/modules_mg_traits/module3_fun_mg_traits.sh" \
 --input_file "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.faa" \
 --output_dir "${OUTPUT_DIR}/fun" \
 --sample_name "${SAMPLE_NAME}" \
@@ -395,7 +394,7 @@ NUM_GENES=$(egrep -c ">" "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.ffn")
 --nslots "${NSLOTS}"
 
 if [[ $? -ne 0 ]]; then
-  echo "module3_fun_mg_traits.bash failed"
+  echo "module3_fun_mg_traits.sh failed"
   exit 1
 fi
 
@@ -514,7 +513,7 @@ fi
 
 echo -e "\ncomputing tax mg_traits ...\n"
 
-"${MG_TRAITS_DIR}/modules_mg_traits/module4_tax_mg_traits.bash" \
+"${MG_TRAITS_DIR}/modules_mg_traits/module4_tax_mg_traits.sh" \
 --input_smrna "${OUTPUT_DIR}/acn/${SAMPLE_NAME}_smrna.blast" \
 --input_file "${OUTPUT_DIR}/acn/${SAMPLE_NAME}_smrna.fna" \
 --output_dir "${OUTPUT_DIR}/tax" \
@@ -526,7 +525,7 @@ echo -e "\ncomputing tax mg_traits ...\n"
 --confidence "${CONFIDENCE}"
 
 if [[ $? -ne 0 ]]; then
-  echo "module4_tax_mg_traits.bash failed"
+  echo "module4_tax_mg_traits.sh failed"
   exit 1
 fi  
 
@@ -536,7 +535,7 @@ fi
 
 echo -e "\ncomputing resfam mg_traits ...\n"
 
-"${MG_TRAITS_DIR}/modules_mg_traits/module5_res_mg_traits.bash" \
+"${MG_TRAITS_DIR}/modules_mg_traits/module5_res_mg_traits.sh" \
 --input_file "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.faa" \
 --output_dir "${OUTPUT_DIR}/res" \
 --sample_name "${SAMPLE_NAME}" \
@@ -545,7 +544,7 @@ echo -e "\ncomputing resfam mg_traits ...\n"
 --nslots "${NSLOTS}"
 
 if [[ $? -ne 0 ]]; then
-  echo "module5_res_mg_traits.bash failed"
+  echo "module5_res_mg_traits.sh failed"
   exit 1
 fi  
 
@@ -555,7 +554,7 @@ fi
 
 echo -e "\ncomputing bgc mg_traits ...\n"
 
-"${MG_TRAITS_DIR}/modules_mg_traits/module6_bgc_mg_traits.bash" \
+"${MG_TRAITS_DIR}/modules_mg_traits/module6_bgc_mg_traits.sh" \
 --input_file "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.faa" \
 --output_dir "${OUTPUT_DIR}/bgc" \
 --sample_name "${SAMPLE_NAME}" \
@@ -563,7 +562,7 @@ echo -e "\ncomputing bgc mg_traits ...\n"
 --nslots "${NSLOTS}"
 
 if [[ $? -ne 0 ]]; then
-  echo "module5_res_mg_traits.bash failed"
+  echo "module5_res_mg_traits.sh failed"
   exit 1
 fi  
 
@@ -573,7 +572,7 @@ fi
 
 echo -e "\ncomputing cazyme mg_traits ...\n"
 
-"${MG_TRAITS_DIR}/modules_mg_traits/module7_caz_mg_traits.bash" \
+"${MG_TRAITS_DIR}/modules_mg_traits/module7_caz_mg_traits.sh" \
 --input_file "${OUTPUT_DIR}/orf/${SAMPLE_NAME}.faa" \
 --output_dir "${OUTPUT_DIR}/caz" \
 --sample_name "${SAMPLE_NAME}" \
@@ -582,7 +581,7 @@ echo -e "\ncomputing cazyme mg_traits ...\n"
 --nslots "${NSLOTS}"
 
 if [[ $? -ne 0 ]]; then
-  echo "module5_res_mg_traits.bash failed"
+  echo "module5_res_mg_traits.sh failed"
   exit 1
 fi  
 
