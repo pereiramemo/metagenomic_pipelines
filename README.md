@@ -4,7 +4,7 @@ This repository contains the code to preprocess metagenomic data: **preprocess_p
 The folder **preprocess** contains a pipeline programmed in BASH, that can be executed from the command line to preprocess raw Illumina paired-end reads obtained from metagenomic samples (named [preprocess_pipeline.sh](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline.sh)). The main tasks consist of checking for the presence of adapters, merging the paired-end reads, and quality trimming the merged and unmerged reads. It additionally computes and plots the number of reads and mean read length of the intermediate files to trace the preprocessing tasks and detect potential irregularities. The output consists of a fasta file (i.e., ```*workable.fasta```), ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files (i.e., ```stats.tsv``` and ```stats_plots.png```).  
 Optionally, the pipeline can be used to produce quality checked paired-end reads.
 
-    **Dependencies**:  
+**Dependencies**:  
 [bzip2](http://www.bzip.org)  
 [gzip](https://www.gzip.org)  
 [seqtk](https://github.com/lh3/seqtk)  
@@ -12,10 +12,9 @@ Optionally, the pipeline can be used to produce quality checked paired-end reads
 [PEAR](https://cme.h-its.org/exelixis/web/software/pear)  
 [R](https://www.r-project.org)  
 [tidyverse](https://www.tidyverse.org) R package  
-
-    Once these tools are installed, the [preprocess_pipeline_conf.sh](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.sh) has to be edited to set the correct paths.
-
-    To see the help run ```./preprocess_pipeline.sh --help```
+  
+Once these tools are installed, the [preprocess_pipeline_conf.sh](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.sh) has to be edited to set the correct paths.
+To see the help run ```./preprocess_pipeline.sh --help```
 
 ```
 Usage: ./preprocess_pipeline.sh <options>
