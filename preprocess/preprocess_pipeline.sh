@@ -722,7 +722,7 @@ if [[ "${OUTPUT_MERGED}" == "t" ]]; then
     in2="${R2_UNASSEM}" \
     out="${R1_UNASSEM_QC}" \
     out2="${R2_UNASSEM_QC}" \
-    minlength=50 \
+    minlength="${MIN_LENGTH}" \
     threads="${NSLOTS}" \
     qtrim=rl \
     trimq="${MIN_QUAL}"
@@ -869,7 +869,6 @@ if [[ "${PLOT}" == t ]]; then
   fi
 fi  
   
-
 ###############################################################################
 ### 17. Clean
 ###############################################################################
@@ -961,7 +960,7 @@ if [[ "${OUTPUT_MERGED}" == "t" ]]; then
    
   if [[ "${COMPRESS}" == "f" ]]; then 
   
-   mv "${R_ASSEM_QC_FA}""${OUTPUT_DIR}/${SAMPLE_NAME}_workable.fasta"
+   mv "${R_ASSEM_QC_FA}" "${OUTPUT_DIR}/${SAMPLE_NAME}_workable.fasta"
    
     if [[ $? -ne 0 ]]; then
       echo "rename to workable failed"
