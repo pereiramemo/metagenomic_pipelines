@@ -5,8 +5,9 @@
 ###############################################################################
 
 set -o pipefail 
-source "${HOME}/workspace/repositories/metagenomic_pipelines/preprocess/\
-preprocess_pipeline_conf.bash"
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/preprocess_pipeline_conf.sh"
 
 ###############################################################################
 # 2. Define help

@@ -7,7 +7,7 @@ library(ShortRead)
 library(doParallel)
 library(dada2)
 
-args = commandArgs(trailingOnly=TRUE)
+args <- commandArgs(trailingOnly=TRUE)
 
 ###############################################################################
 ### 2. Load data

@@ -12,6 +12,17 @@ Optionally, the pipeline can be used to produce quality checked paired-end reads
 [PEAR](https://cme.h-its.org/exelixis/web/software/pear)  
 [R](https://www.r-project.org)  
 [tidyverse](https://www.tidyverse.org) R package  
+
+**Installation with mamba**:  
+All dependencies can be installed using mamba (or conda). Create a new environment using the provided `environment.yml` file:
+```bash
+mamba env create -f environment.yml
+```
+
+Then activate the environment:
+```bash
+mamba activate metagenomic_pipeline
+```
   
 Once these tools are installed, the [preprocess_pipeline_conf.sh](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.sh) has to be edited to set the correct paths.
 To see the help run ```./preprocess_pipeline.sh --help```

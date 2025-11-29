@@ -1,0 +1,16 @@
+name: metagenomic_pipeline
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bzip2
+  - gzip
+  - seqtk
+  - bbmap
+  - pear
+  - r-base
+  - r-tidyverse
+  - bioconductor-shortread
+  - r-doparallel
+  - bioconductor-dada2
