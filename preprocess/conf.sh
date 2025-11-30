@@ -15,7 +15,7 @@ bzip2="bzip2"
 gunzip="gunzip"
 fq2fa="${PREPROCESS_DIR}/resources/fq2fa.sh"
 plots="${PREPROCESS_DIR}/resources/plots.R"
-quality_check_plots="${PREPROCESS_DIR}/resources/quality_check_plots.R"
+quality_check="${PREPROCESS_DIR}/quality_check.R"
 
 # files
 # BBMap adapters file location in conda environment
@@ -48,8 +48,8 @@ function check_dependencies {
   if [[ ! -f "${plots}" ]]; then
     missing_tools+=("plots.R")
   fi
-  if [[ ! -f "${quality_check_plots}" ]]; then
-    missing_tools+=("quality_check_plots.R")
+  if [[ ! -f "${quality_check}" ]]; then
+    missing_tools+=("quality_check.R")
   fi
   
   # Report missing tools
