@@ -1,5 +1,5 @@
 # Metagenomic pipelines
-This repository contains the code to preprocess and quality check metagenomic data.
+This repository contains the scripts used to preprocess and quality-check metagenomic data: `preprocess_pipeline.sh` and `quality_check.R`, written in Bash and R, respectively.
 
 # Repository structure
 
@@ -56,34 +56,129 @@ Then activate the environment:
 mamba activate metagenomic_pipeline
 ```
 
-# **How to use**
+# **Instructions**
 
-The folder **preprocess** contains a pipeline programmed in BASH, that can be executed from the command line to preprocess raw Illumina paired-end reads obtained from metagenomic samples (named [preprocess_pipeline.sh](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline.sh)). The main tasks consist of checking for the presence of adapters, merging the paired-end reads, and quality trimming the merged and unmerged reads. It additionally computes and plots the number of reads and mean read length of the intermediate files to trace the preprocessing tasks and detect potential irregularities. The output consists of a fasta file (i.e., ```*workable.fasta```), ready to use in downstream analyses, and table, and a plot of the number of sequences and mean read length of the intermediate files (i.e., ```stats.tsv``` and ```stats_plots.png```).  
-Optionally, the pipeline can be used to produce quality checked paired-end reads.
+## preprocess_pipeline.sh
 
+[preprocess_pipeline.sh](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline.sh): This bash pipeline preprocesses raw Illumina paired-end reads from metagenomic samples. The main tasks include:
+- Checking for the presence of adapters and trimming them
+- Merging paired-end reads using PEAR or BBMerge
+- Quality trimming of merged and unmerged reads
+- Computing and plotting read statistics (number and mean length) for intermediate files
+
+The output consists of:
+- ```*workable.fasta```: FASTA file ready for downstream analyses (merged reads)
+- ```stats.tsv```: Table with read statistics
+- ```stats_plots.png```: Plot showing number of sequences and mean read length
+
+Optionally, the pipeline can output quality-checked paired-end reads as FASTQ files.
 
 To see the help run ```./preprocess_pipeline.sh --help```
 
 ```
 Usage: ./preprocess_pipeline.sh <options>
---help                          print this help
---clean t|f                     remove all intermediate files (default f)
---compress t|f                  output data as .gz files (default f)
---merger CHAR                   tool to merge paired-end reads, one of "pear" of "bbmerge" (default "pear")
---min_length NUM                minimum length of (PE or merged) reads (default 75)
---min_overlap NUM               minimum overlap to merge paired-end reads with pear
---min_qual NUM                  minimum quality score to trim reads (default 20)
---nslots NUM                    number of threads used (default 12)
---output_dir CHAR               directory to output generated data (i.e., preprocessed data, plots, tables)
---output_pe t|f                 output quality checked paired-end reads as fastq files (default f)
---output_merged t|f             output quality checked merged reads as fasta file (i.e., workable.fasta) (default t)
---overwrite t|f                 overwrite previous directory (default f)
---pvalue NUM                    p value used to run pear. See pear help for valid p values (default: 0.01)
---plot t|f                      create statistics barplot (default f)
---reads CHAR                    input R1 reads
---reads2 CHAR                   input R2 reads
---sample_name CHAR              sample name (default metagenomex)
---subsample t|f                 subsample metagenome to 10K to test execution (default f)
---trim_adapters t|f             check for adapters and trim (default f)
+
+Options:
+	--help
+		print this help
+
+	--clean=t|f
+		remove all intermediate files [default=f]
+
+	--compress=t|f
+		output data as .gz files [default=f]
+
+	--merger=CHAR
+		tool to merge paired-end reads, one of "pear" or "bbmerge" [default=pear]
+
+	--min_length=NUM
+		minimum length of (PE or merged) reads [default=75]
+
+	--min_overlap=NUM
+		minimum overlap to merge paired-end reads with pear
+
+	--min_qual=NUM
+		minimum quality score to trim reads [default=20]
+
+	--nslots=NUM
+		number of threads used [default=12]
+
+	--output_dir=CHAR
+		directory to output generated data (preprocessed data, plots, tables)
+
+	--output_pe=t|f
+		output quality checked paired-end reads as fastq files [default=f]
+
+	--output_merged=t|f
+		output quality checked merged reads as fasta file (workable.fasta) [default=t]
+
+	--overwrite=t|f
+		overwrite previous directory [default=f]
+
+	--pvalue=NUM
+		p value used to run pear [default=0.01]
+
+	--plot=t|f
+		create statistics barplot [default=f]
+
+	--reads=CHAR
+		input R1 reads
+
+	--reads2=CHAR
+		input R2 reads
+
+	--sample_name=CHAR
+		sample name [default=metagenomex]
+
+	--subsample=t|f
+		subsample metagenome to 10K to test execution [default=f]
+
+	--trim_adapters=t|f
+		check for adapters and trim [default=f]
 ```
+
+## quality_check_plots.R
+
+[quality_check_plots.R](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/resources/quality_check_plots.R): This R script performs comprehensive quality assessment of raw Illumina paired-end reads. It generates multiple plots to evaluate read quality and identify potential issues. The main analyses include:
+- Calculation of mean quality scores for R1 and R2 reads
+- Plotting quality scores versus read counts
+- Generating histograms of read count distributions
+- Detection and quantification of PhiX contamination
+
+The output consists of five PNG files:
+- ```r1_mean_q_vs_nseq.png```: Quality score vs read count for R1
+- ```r2_mean_q_vs_nseq.png```: Quality score vs read count for R2
+- ```samples_hist.png```: Histogram of read counts per sample
+- ```samples_hist_log.png```: Log-transformed histogram of read counts
+- ```samples_perc_phix_barplot.png```: PhiX contamination levels per sample
+
+To see the help run ```Rscript quality_check_plots.R --help```
+
+```
+Usage: quality_check_plots.R [options]
+
+Options:
+	--input_dir=CHARACTER
+		Input directory with FASTQ files
+
+	--output_dir=CHARACTER
+		Output directory for plots
+
+	--nslots=INTEGER
+		Number of threads to use [default=12]
+
+	--r1_pattern=CHARACTER
+		Pattern for R1 FASTQ files [default=R1_001.fastq.gz]
+
+	--r2_pattern=CHARACTER
+		Pattern for R2 FASTQ files [default=R2_001.fastq.gz]
+
+	--overwrite=LOGICAL
+		Overwrite previous output [default=FALSE]
+
+	-h, --help
+		Show this help message and exit
+```
+
+
 
