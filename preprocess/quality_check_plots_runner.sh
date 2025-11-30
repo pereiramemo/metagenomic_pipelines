@@ -7,7 +7,7 @@
 set -o pipefail 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/preprocess_pipeline_conf.sh"
+source "${SCRIPT_DIR}/conf.sh"
 
 ###############################################################################
 # 2. Define help
@@ -15,14 +15,16 @@ source "${SCRIPT_DIR}/preprocess_pipeline_conf.sh"
 
 show_usage(){
   cat <<EOF
-Usage: ./quality_check_plots.bash <options>
+Usage: ./quality_check_plots_runner.sh <options>
 --help                          print this help
 --input_dir CHAR                directory with input fastq files
 --output_dir CHAR               directory to output plots
---r1_pattern CHAR               pattern of R1 fastq files
---r2_pattern CHAR               pattern of R2 fastq files
---nslots NUM                    number of threads used (default 12)
---overwrite t|f                 overwrite previous output (default f)
+--r1_pattern CHAR               pattern of R1 fastq files (default: R1_001.fastq.gz)
+--r2_pattern CHAR               pattern of R2 fastq files (default: R2_001.fastq.gz)
+--nslots NUM                    number of threads used (default: 12)
+--overwrite TRUE|FALSE          overwrite previous output (default: FALSE)
+
+Note: All validation and directory creation is handled by the R script.
 EOF
 }
 
@@ -137,7 +139,7 @@ if [[ -z "${NSLOTS}" ]]; then
 fi
 
 if [[ -z "${OVERWRITE}" ]]; then
-  OVERWRITE="f"
+  OVERWRITE="FALSE"
 fi
 
 if [[ -z "${R1_PATTERN}" ]]; then
@@ -149,47 +151,20 @@ if [[ -z "${R2_PATTERN}" ]]; then
 fi  
 
 ###############################################################################
-# 5. Check input dir
-###############################################################################
-
-if [[ ! -d "${INPUT_DIR}" ]]; then
-  echo "no input dir"
-  exit 1
-fi
-
-###############################################################################
-# 6. Check output 
-###############################################################################
-
-if [[ -d "${OUTPUT_DIR}" && "${OVERWRITE}" == f  ]]; then
-  echo "output directory ${OUTPUT_DIR} already exists"
-  echo "use \"--overwrite t\" to overwrite"
-  exit 0
-fi  
-  
-if [[ -d "${OUTPUT_DIR}" && "${OVERWRITE}" == t  ]]; then  
-  rm -r "${OUTPUT_DIR}"/*.png
-fi  
-  
-if [[ ! -d "${OUTPUT_DIR}" ]]; then  
-  mkdir "${OUTPUT_DIR}"
-fi    
-
-###############################################################################
-# 7. Run rscript
+# 5. Run rscript
 ###############################################################################
 
 Rscript --vanilla \
 "${quality_check_plots}" \
-"${INPUT_DIR}" \
-"${OUTPUT_DIR}" \
-"${NSLOTS}" \
-"${R1_PATTERN}" \
-"${R2_PATTERN}"
+--input_dir "${INPUT_DIR}" \
+--output_dir "${OUTPUT_DIR}" \
+--nslots "${NSLOTS}" \
+--r1_pattern "${R1_PATTERN}" \
+--r2_pattern "${R2_PATTERN}" \
+--overwrite "${OVERWRITE}"
 
 if [[ $? != "0" ]]; then
   echo "quality_check_plots.R failed"
-  rm -r "${OUTPUT_DIR}"/*.png
   exit 1
 fi
 
