@@ -1,6 +1,31 @@
 # Load conda environment
-# Make sure the metagenomic_pipeline environment is activated before running the pipeline
-# Run: mamba activate metagenomic_pipeline
+# Check if metagenomic_pipeline environment is activated, if not, activate it
+if [[ "${CONDA_DEFAULT_ENV}" != "metagenomic_pipeline" ]]; then
+  echo "Activating metagenomic_pipeline conda environment..."
+  
+  # Try to find conda/mamba
+  if command -v mamba &> /dev/null; then
+    eval "$(mamba shell.bash hook)"
+    mamba activate metagenomic_pipeline
+  elif command -v conda &> /dev/null; then
+    eval "$(conda shell.bash hook)"
+    conda activate metagenomic_pipeline
+  else
+    echo "ERROR: Neither mamba nor conda found in PATH"
+    echo "Please install mamba or conda and ensure it's in your PATH"
+    exit 1
+  fi
+  
+  # Verify activation was successful
+  if [[ "${CONDA_DEFAULT_ENV}" != "metagenomic_pipeline" ]]; then
+    echo "ERROR: Failed to activate metagenomic_pipeline environment"
+    echo "Please ensure the environment exists. Create it with:"
+    echo "  mamba env create -f environment.yml"
+    exit 1
+  fi
+  
+  echo "Environment activated successfully"
+fi
 
 # dirs
 # Get the directory where this script is located
