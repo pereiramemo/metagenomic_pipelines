@@ -137,9 +137,9 @@ Options:
 		check for adapters and trim [default=f]
 ```
 
-## quality_check_plots.R
+## quality_check.R
 
-[quality_check_plots.R](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/resources/quality_check_plots.R): This R script performs comprehensive quality assessment of raw Illumina paired-end reads. It generates multiple plots to evaluate read quality and identify potential issues. The main analyses include:
+[quality_check.R](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/quality_check.R): This R script performs comprehensive quality assessment of raw Illumina paired-end reads. It generates multiple plots to evaluate read quality and identify potential issues. The main analyses include:
 - Calculation of mean quality scores for R1 and R2 reads
 - Plotting quality scores versus read counts
 - Generating histograms of read count distributions
