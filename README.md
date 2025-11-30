@@ -41,8 +41,9 @@ Then activate the environment:
 ```bash
 mamba activate metagenomic_pipeline
 ```
-  
-Once these tools are installed, the [preprocess_pipeline_conf.sh](https://github.com/pereiramemo/metagenomic_pipelines/blob/main/preprocess/preprocess_pipeline_conf.sh) has to be edited to set the correct paths.
+
+# **How to use**
+
 To see the help run ```./preprocess_pipeline.sh --help```
 
 ```
