@@ -12,9 +12,27 @@ Optionally, the pipeline can be used to produce quality checked paired-end reads
 [PEAR](https://cme.h-its.org/exelixis/web/software/pear)  
 [R](https://www.r-project.org)  
 [tidyverse](https://www.tidyverse.org) R package  
+[ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) R/Bioconductor package  
+[doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) R package  
+[dada2](https://bioconductor.org/packages/release/bioc/html/dada2.html) R/Bioconductor package  
 
 **Installation with mamba**:  
-All dependencies can be installed using mamba (or conda). Create a new environment using the provided `environment.yml` file:
+All dependencies can be installed using mamba (or conda). 
+
+First, check if mamba is installed:
+```bash
+command -v mamba
+```
+
+If mamba is not installed, you can install it via:
+- **Miniforge** (recommended): [https://github.com/conda-forge/miniforge](https://github.com/conda-forge/miniforge)
+- **Mambaforge**: [https://github.com/conda-forge/miniforge#mambaforge](https://github.com/conda-forge/miniforge#mambaforge)
+- **Or install mamba into an existing conda installation**:
+  ```bash
+  conda install -n base -c conda-forge mamba
+  ```
+
+Once mamba is installed, create a new environment using the provided `environment.yml` file:
 ```bash
 mamba env create -f environment.yml
 ```
