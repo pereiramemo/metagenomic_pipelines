@@ -6,34 +6,95 @@ library(tidyverse)
 library(ShortRead)
 library(doParallel)
 library(dada2)
+library(optparse)
+ 
+###############################################################################
+### 2. Parse command line arguments
+###############################################################################
 
-args <- commandArgs(trailingOnly=TRUE)
+option_list <- list(
+  make_option(c("--input_dir"), type="character", default=NULL,
+              help="Input directory with FASTQ files", metavar="character"),
+  make_option(c("--output_dir"), type="character", default=NULL,
+              help="Output directory for plots", metavar="character"),
+  make_option(c("--nslots"), type="integer", default=12,
+              help="Number of threads to use [default=%default]", metavar="integer"),
+  make_option(c("--r1_pattern"), type="character", default="R1_001.fastq.gz",
+              help="Pattern for R1 FASTQ files [default=%default]", metavar="character"),
+  make_option(c("--r2_pattern"), type="character", default="R2_001.fastq.gz",
+              help="Pattern for R2 FASTQ files [default=%default]", metavar="character"),
+  make_option(c("--overwrite"), type="logical", default=FALSE,
+              help="Overwrite previous output [default=%default]", metavar="logical")
+)
+
+opt_parser <- OptionParser(option_list=option_list)
+opt <- parse_args(opt_parser)
+
+# Check required arguments
+if (is.null(opt$input_dir) || is.null(opt$output_dir)) {
+  print_help(opt_parser)
+  stop("--input_dir and --output_dir are required arguments.", call.=FALSE)
+}
 
 ###############################################################################
-### 2. Load data
+### 3. Validate input directory
 ###############################################################################
 
-# INPUT_DIR <- "/home/epereira/workspace/dev/samo/metagenomics/data_redu/"
-# OUTPUT_DIR <- "/home/epereira/workspace/dev/samo/metagenomics/results/quality_analysis/"
-# NSLOTS <- 40
-# registerDoParallel(cores = NSLOTS)
-# PATTERN_R1 <- "_R1_clipped_redu.fastq"
-# PATTERN_R2 <- "_R2_clipped_redu.fastq"
+if (!dir.exists(opt$input_dir)) {
+  stop(paste("Error: Input directory does not exist:", opt$input_dir), call.=FALSE)
+}
 
-INPUT_DIR <- args[1]
-OUTPUT_DIR <- args[2]
-NSLOTS <- args[3] %>% as.numeric
+###############################################################################
+### 4. Check and prepare output directory
+###############################################################################
+
+if (dir.exists(opt$output_dir)) {
+  if (!opt$overwrite) {
+    stop(paste("Error: Output directory already exists:", opt$output_dir, 
+               "\nUse --overwrite=TRUE to overwrite"), call.=FALSE)
+  } else {
+    # Remove existing PNG files
+    png_files <- list.files(opt$output_dir, pattern = "\\.png$", full.names = TRUE)
+    if (length(png_files) > 0) {
+      file.remove(png_files)
+      message("Removed existing PNG files from output directory")
+    }
+  }
+} else {
+  # Create output directory
+  dir.create(opt$output_dir, recursive = TRUE)
+  message(paste("Created output directory:", opt$output_dir))
+}
+
+###############################################################################
+### 5. Load data
+###############################################################################
+
+INPUT_DIR <- opt$input_dir
+OUTPUT_DIR <- opt$output_dir
+NSLOTS <- opt$nslots
 registerDoParallel(cores = NSLOTS)
-PATTERN_R1 <- args[4]
-PATTERN_R2 <- args[5]
+PATTERN_R1 <- opt$r1_pattern
+PATTERN_R2 <- opt$r2_pattern
 
 rawR1 <- sort(list.files(INPUT_DIR, pattern = PATTERN_R1, full.names = T))
 rawR2 <- sort(list.files(INPUT_DIR, pattern = PATTERN_R2, full.names = T))
+
+# Check if files were found
+if (length(rawR1) == 0) {
+  stop(paste("Error: No R1 files found matching pattern:", PATTERN_R1), call.=FALSE)
+}
+if (length(rawR2) == 0) {
+  stop(paste("Error: No R2 files found matching pattern:", PATTERN_R2), call.=FALSE)
+}
+
+message(paste("Found", length(rawR1), "R1 files and", length(rawR2), "R2 files"))
+
 SAMPLE_NAMES <- basename(rawR1) %>%
                 sub(pattern = "_.*", replacement = "")
 
 ###############################################################################
-### 3. R1 count
+### 6. R1 count
 ###############################################################################
 
 count_seqs <- function(p) {
@@ -48,7 +109,7 @@ seq_counts_df <- foreach(i = rawR1, .combine=rbind) %dopar% {
 }
 
 ###############################################################################
-### 4. R1 quality vs nseq
+### 7. R1 quality vs nseq
 ###############################################################################
 
 x_r1 <- qa(dirPath = INPUT_DIR, pattern = PATTERN_R1, sample = T, n = 5000)
@@ -75,7 +136,7 @@ ggsave(p_r1, filename = file_p_r1,
        device = "png", width = 5, height = 4, dpi = 300)
   
 ###############################################################################
-### 4. R2 quality vs nseq
+### 8. R2 quality vs nseq
 ###############################################################################
 
 x_r2 <- qa(dirPath = INPUT_DIR, pattern = PATTERN_R2, sample = T, n = 5000)
@@ -100,7 +161,7 @@ ggsave(p_r2, filename = file_p_r2,
        device = "png", width = 5, height = 4, dpi = 300)
 
 ###############################################################################
-### 4. Plot nseq hist
+### 9. Plot nseq hist
 ###############################################################################
 
 samples_hist_p <- ggplot(data = qa_means2counts, aes(nseq)) +
@@ -121,7 +182,7 @@ ggsave(samples_hist_log_p, filename = file_p_hist_log,
 
 
 ###############################################################################
-### 5. Estimate % of Phix sequences
+### 10. Estimate % of Phix sequences
 ###############################################################################
 
 count_phix_seqs <- function(p) {
@@ -137,7 +198,7 @@ phix_counts_df <- foreach(i = rawR1, .combine=rbind) %dopar% {
 }
 
 ###############################################################################
-### Plot % of Phix sequences
+### 11. Plot % of Phix sequences
 ###############################################################################
 
 text_size <- 6
@@ -177,4 +238,17 @@ perc_phix_barplot <- ggplot(data = X, aes(x = sample, y = perc, fill =  color)) 
 file_perc_phix_barplot <- paste(OUTPUT_DIR,"samples_perc_phix_barplot.png", sep = "/")
 ggsave(perc_phix_barplot, filename = file_perc_phix_barplot, 
        device = "png", width = 10, height = 4, dpi = 300)
+
+###############################################################################
+### 12. Summary
+###############################################################################
+
+message("\n=== Quality check plots completed successfully ===")
+message(paste("Output directory:", OUTPUT_DIR))
+message("Generated plots:")
+message("  - r1_mean_q_vs_nseq.png")
+message("  - r2_mean_q_vs_nseq.png")
+message("  - samples_hist.png")
+message("  - samples_hist_log.png")
+message("  - samples_perc_phix_barplot.png")
 
