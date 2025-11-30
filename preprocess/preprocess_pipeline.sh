@@ -5,12 +5,11 @@
 set -o pipefail 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/preprocess_pipeline_conf.sh"
+source "${SCRIPT_DIR}/conf.sh"
 
 ###############################################################################
 # 2. Define help
-###############################################################################
-
+############################################################################---
 show_usage(){
   cat <<EOF
 Usage: ./preprocess_pipeline.sh <options>

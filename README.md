@@ -18,17 +18,13 @@ This repository contains the scripts used to preprocess and quality-check metage
         └── quality_check_plots.R            # R script for quality assessment plots
 ```
 
-**Dependencies**:  
-[bzip2](http://www.bzip.org)  
-[gzip](https://www.gzip.org)  
-[seqtk](https://github.com/lh3/seqtk)  
-[BBDuk](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide)  
-[PEAR](https://cme.h-its.org/exelixis/web/software/pear)  
-[R](https://www.r-project.org)  
-[tidyverse](https://www.tidyverse.org) R package  
-[ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) R/Bioconductor package  
-[doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) R package  
-[dada2](https://bioconductor.org/packages/release/bioc/html/dada2.html) R/Bioconductor package  
+# **Installation instructions**
+
+**Clone the repository**:  
+```bash
+git clone https://github.com/pereiramemo/metagenomic_pipelines.git
+cd metagenomic_pipelines
+```
 
 **Installation with mamba**:  
 All dependencies can be installed using mamba (or conda). 
@@ -56,7 +52,7 @@ Then activate the environment:
 mamba activate metagenomic_pipeline
 ```
 
-# **Instructions**
+# **How to use**
 
 ## preprocess_pipeline.sh
 
@@ -179,6 +175,28 @@ Options:
 	-h, --help
 		Show this help message and exit
 ```
+
+# **Dependencies**:  
+[bzip2](http://www.bzip.org)  
+[gzip](https://www.gzip.org)  
+[seqtk](https://github.com/lh3/seqtk)  
+[BBDuk](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide)  
+[PEAR](https://cme.h-its.org/exelixis/web/software/pear)  
+[R](https://www.r-project.org)  
+[tidyverse](https://www.tidyverse.org) R package  
+[ShortRead](https://bioconductor.org/packages/release/bioc/html/ShortRead.html) R/Bioconductor package  
+[doParallel](https://cran.r-project.org/web/packages/doParallel/index.html) R package  
+[dada2](https://bioconductor.org/packages/release/bioc/html/dada2.html) R/Bioconductor package  
+
+# **License**
+
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+Copyright (C) 2025 Emiliano Pereira
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.  
 
 
 
