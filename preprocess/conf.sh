@@ -34,8 +34,25 @@ function check_dependencies {
   
   # Check R packages
   if command -v Rscript &> /dev/null; then
+    # Check tidyverse
     if ! Rscript -e "library(tidyverse)" &> /dev/null; then
       missing_tools+=("r-tidyverse")
+    fi
+    # Check ShortRead (Bioconductor)
+    if ! Rscript -e "library(ShortRead)" &> /dev/null; then
+      missing_tools+=("bioconductor-shortread")
+    fi
+    # Check doParallel
+    if ! Rscript -e "library(doParallel)" &> /dev/null; then
+      missing_tools+=("r-doparallel")
+    fi
+    # Check dada2 (Bioconductor)
+    if ! Rscript -e "library(dada2)" &> /dev/null; then
+      missing_tools+=("bioconductor-dada2")
+    fi
+    # Check optparse
+    if ! Rscript -e "library(optparse)" &> /dev/null; then
+      missing_tools+=("r-optparse")
     fi
   else
     missing_tools+=("R")
