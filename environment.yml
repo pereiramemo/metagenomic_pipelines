@@ -15,3 +15,4 @@ dependencies:
   - bioconductor-shortread
   - r-doparallel
   - bioconductor-dada2
+  - tbb=2020.2  # Required for dada2 compatibility
