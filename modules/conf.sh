@@ -61,7 +61,11 @@ quality_check="${MODULES_DIR}/0-quality_check.R"
 ###############################################################################
 
 # BBMap adapters file location in conda environment
-ADAPTERS="${CONDA_PREFIX}/opt/bbmap"*"/resources/adapters.fa"
+ADAPTERS=$(find "${CONDA_PREFIX}/opt/bbmap"* -name "adapters.fa")
+if [[ ! -f "${ADAPTERS}" ]]; then
+  echo "ERROR: BBMap adapters file not found at expected location: ${ADAPTERS}"
+  echo "Please ensure BBMap is installed in the metagenomic_pipeline conda environment."
+fi
 
 ###############################################################################
 # functions
