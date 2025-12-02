@@ -364,5 +364,5 @@ fi
 ### 9. Exit
 ###############################################################################
 
-log "${GREEN}mg-clust_module-1.bash exited successfully.${NC}"
+log "${GREEN}assembly_and_map_pipeline.sh exited successfully.${NC}"
 exit 0

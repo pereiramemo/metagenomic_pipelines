@@ -38,6 +38,8 @@ seqtk="seqtk"
 pear="pear"
 bzip2="bzip2"
 gunzip="gunzip"
+rscript="Rscript"
+pigz="pigz"
 fq2fa="${PREPROCESS_DIR}/resources/fq2fa.sh"
 plots="${PREPROCESS_DIR}/resources/plots.R"
 quality_check="${PREPROCESS_DIR}/quality_check.R"
@@ -106,9 +108,6 @@ function check_dependencies {
   
   return 0
 }
-
-# Run dependency check
-check_dependencies || exit 1
 
 # functions
 function count_fastq {
