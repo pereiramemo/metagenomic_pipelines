@@ -9,6 +9,7 @@ dependencies:
   - seqtk
   - bbmap
   - pear
+  - emboss
   - r-base
   - r-tidyverse
   - r-optparse
