@@ -42,7 +42,7 @@ rscript="Rscript"
 pigz="pigz"
 fq2fa="${MODULES_DIR}/resources/fq2fa.sh"
 plots="${MODULES_DIR}/resources/plots.R"
-quality_check="${MODULES_DIR}/quality_check.R"
+quality_check="${MODULES_DIR}/0-quality_check.R"
 
 # files
 # BBMap adapters file location in conda environment
