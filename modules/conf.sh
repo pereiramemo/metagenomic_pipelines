@@ -29,7 +29,7 @@ fi
 
 # dirs
 # Get the directory where this script is located
-PREPROCESS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MODULES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # tools (using conda environment)
 bbduk="bbduk.sh"
@@ -40,9 +40,9 @@ bzip2="bzip2"
 gunzip="gunzip"
 rscript="Rscript"
 pigz="pigz"
-fq2fa="${PREPROCESS_DIR}/resources/fq2fa.sh"
-plots="${PREPROCESS_DIR}/resources/plots.R"
-quality_check="${PREPROCESS_DIR}/quality_check.R"
+fq2fa="${MODULES_DIR}/resources/fq2fa.sh"
+plots="${MODULES_DIR}/resources/plots.R"
+quality_check="${MODULES_DIR}/quality_check.R"
 
 # files
 # BBMap adapters file location in conda environment
