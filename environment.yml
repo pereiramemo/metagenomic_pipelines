@@ -10,6 +10,11 @@ dependencies:
   - bbmap
   - pear
   - emboss
+  - pigz
+  - megahit
+  - bwa
+  - samtools
+  - picard
   - r-base
   - r-tidyverse
   - r-optparse
