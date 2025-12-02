@@ -1,4 +1,13 @@
+###############################################################################
+# conf.sh
+# Configuration file for metagenomic pipeline
+###############################################################################
+
+
+###############################################################################
 # Load conda environment
+###############################################################################
+
 # Check if metagenomic_pipeline environment is activated, if not, activate it
 if [[ "${CONDA_DEFAULT_ENV}" != "metagenomic_pipeline" ]]; then
   echo "Activating metagenomic_pipeline conda environment..."
@@ -27,7 +36,10 @@ if [[ "${CONDA_DEFAULT_ENV}" != "metagenomic_pipeline" ]]; then
   echo "Environment activated successfully"
 fi
 
+###############################################################################
 # dirs
+###############################################################################
+
 # Get the directory where this script is located
 MODULES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -44,11 +56,17 @@ fq2fa="${MODULES_DIR}/resources/fq2fa.sh"
 plots="${MODULES_DIR}/resources/plots.R"
 quality_check="${MODULES_DIR}/0-quality_check.R"
 
+###############################################################################
 # files
-# BBMap adapters file location in conda environment
-ADAPTERS="${CONDA_PREFIX}/opt/bbmap*/resources/adapters.fa"
+###############################################################################
 
-# Check that all required tools are installed
+# BBMap adapters file location in conda environment
+ADAPTERS="${CONDA_PREFIX}/opt/bbmap"*"/resources/adapters.fa"
+
+###############################################################################
+# functions
+###############################################################################
+
 function check_dependencies {
   local missing_tools=()
   
