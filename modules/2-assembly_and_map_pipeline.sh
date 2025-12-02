@@ -96,7 +96,7 @@ SAMPLE_NAME=""
 # Ensure getopt is available
 check_cmd getopt
 
-PARSED_ARGS=$(
+ARGS=$(
   getopt -o '' \
     --long help,assem_dir:,assem_preset:,nslots:,min_contig_length:,output_dir:,overwrite:,reads1:,reads2:,sample_name: \
     -n "$(basename "$0")" -- "$@" \
@@ -106,7 +106,7 @@ PARSED_ARGS=$(
   exit 1
 }
 
-eval set -- "${PARSED_ARGS}"
+eval set -- "${ARGS}"
 
 while true; do
   case "$1" in
@@ -145,7 +145,7 @@ while true; do
 done
 
 ###############################################################################
-### 3.1 Validate parameters
+### 4 Validate parameters
 ###############################################################################
 
 # Mandatory parameters
@@ -175,19 +175,10 @@ if ! [[ "${MIN_CONTIG_LENGTH}" =~ ^[0-9]+$ ]]; then
 fi
 
 ###############################################################################
-### 3.2 Check tools and conf variables
+### 5 Check tools and conf variables
 ###############################################################################
 
-# Ensure paths/commands from conf.sh are defined
-: "${megahit:?megahit path not set in conf.sh}"
-: "${bwa:?bwa path not set in conf.sh}"
-: "${samtools:?samtools path not set in conf.sh}"
-: "${picard:?picard jar not set in conf.sh}"
-
-check_cmd "${megahit}"
-check_cmd "${bwa}"
-check_cmd "${samtools}"
-check_cmd java
+check_dependencies
 
 check_file "${picard}" "Picard jar"
 

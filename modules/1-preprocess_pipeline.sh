@@ -119,7 +119,12 @@ ARGS=$(getopt -o '' \
   --long help,clean:,compress:,merger:,min_length:,min_overlap:,min_qual:,nslots:,\
 output_dir:,output_pe:,output_merged:,overwrite:,pvalue:,plot:,reads:,reads2:,\
 sample_name:,subsample:,trim_adapters: \
-  -n preprocess_pipeline -- "$@")
+  -n "$(basename "$0")" -- "$@" \
+  ) || {
+  log_error "Failed to parse arguments."
+  show_usage
+  exit 1
+}
 
 eval set -- "${ARGS}"
 
@@ -488,14 +493,14 @@ STATS_TMP="${OUTPUT_DIR}/stats_tmp.tsv"
 while IFS= read -r FILE; do
     [[ -z "${FILE}" ]] && continue
 
-    N=$("${count_fastq}" "${FILE}")
+    N=$(count_fastq "${FILE}")
     if [[ -z "${N}" ]]; then
         log_error "count_fastq failed for ${FILE}"
         exit 1
     fi
 
     if [[ -s "${FILE}" ]]; then
-        L=$("${compute_mean_length}" "${FILE}")
+        L=$(compute_mean_length "${FILE}")
         if [[ -z "${L}" ]]; then
             log_error "compute_mean_length failed for ${FILE}"
             exit 1

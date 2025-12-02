@@ -75,11 +75,21 @@ function check_dependencies {
   local missing_tools=()
   
   # Check command-line tools
-  for tool in bbduk.sh bbmerge.sh seqtk pear bzip2 gunzip; do
+  for tool in bbduk.sh bbmerge.sh seqtk pear bzip2 gunzip pigz megahit bwa samtools; do
     if ! command -v ${tool} &> /dev/null; then
       missing_tools+=("${tool}")
     fi
   done
+  
+  # Check for picard (Java jar file)
+  if ! command -v picard &> /dev/null; then
+    missing_tools+=("picard")
+  fi
+  
+  # Check for emboss tools (infoseq is part of emboss)
+  if ! command -v infoseq &> /dev/null; then
+    missing_tools+=("emboss")
+  fi
   
   # Check R packages
   if command -v Rscript &> /dev/null; then
