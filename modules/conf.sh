@@ -54,7 +54,7 @@ rscript="Rscript"
 pigz="pigz"
 fq2fa="${MODULES_DIR}/resources/fq2fa.sh"
 plots="${MODULES_DIR}/resources/plots.R"
-quality_check="${MODULES_DIR}/0-quality_check.R"
+quality_check="${MODULES_DIR}/1.2-quality_check.R"
 
 ###############################################################################
 # files
@@ -125,7 +125,7 @@ function check_dependencies {
     missing_tools+=("plots.R")
   fi
   if [[ ! -f "${quality_check}" ]]; then
-    missing_tools+=("quality_check.R")
+    missing_tools+=("1.2-quality_check.R")
   fi
   
   # Report missing tools
