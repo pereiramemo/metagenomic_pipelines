@@ -15,6 +15,7 @@ dependencies:
   - bwa
   - samtools
   - picard
+  - fastp
   - file
   - r-base
   - r-tidyverse
