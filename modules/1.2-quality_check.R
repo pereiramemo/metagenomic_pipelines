@@ -91,7 +91,7 @@ if (length(rawR2) == 0) {
 message(paste("Found", length(rawR1), "R1 files and", length(rawR2), "R2 files"))
 
 SAMPLE_NAMES <- basename(rawR1) %>%
-                sub(pattern = "_.*", replacement = "")
+                sub(pattern = PATTERN_R1, replacement = "")
 
 ###############################################################################
 ### 6. R1 count
