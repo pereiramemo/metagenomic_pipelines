@@ -88,24 +88,44 @@ if (length(rawR2) == 0) {
   stop(paste("Error: No R2 files found matching pattern:", PATTERN_R2), call.=FALSE)
 }
 
+# Check if R1 and R2 have same number of files
+if (length(rawR1) != length(rawR2)) {
+  stop(paste("Error: Mismatch in number of files. R1:", length(rawR1), "R2:", length(rawR2)), call.=FALSE)
+}
+
 message(paste("Found", length(rawR1), "R1 files and", length(rawR2), "R2 files"))
 
-SAMPLE_NAMES <- basename(rawR1) %>%
-                sub(pattern = PATTERN_R1, replacement = "")
+# Helper function to extract sample names consistently
+extract_sample_name <- function(filepath, pattern) {
+  basename(filepath) %>% sub(pattern = pattern, replacement = "", fixed = FALSE)
+}
+
+# Extract sample names from R1 and R2
+SAMPLE_NAMES_R1 <- sapply(rawR1, function(x) extract_sample_name(x, PATTERN_R1))
+SAMPLE_NAMES_R2 <- sapply(rawR2, function(x) extract_sample_name(x, PATTERN_R2))
+
+# Verify that R1 and R2 sample names match
+if (!all(SAMPLE_NAMES_R1 == SAMPLE_NAMES_R2)) {
+  warning("Sample names extracted from R1 and R2 files don't match perfectly. Check your pattern parameters.")
+  message("R1 samples: ", paste(head(SAMPLE_NAMES_R1), collapse=", "))
+  message("R2 samples: ", paste(head(SAMPLE_NAMES_R2), collapse=", "))
+}
+
+SAMPLE_NAMES <- SAMPLE_NAMES_R1
 
 ###############################################################################
 ### 6. R1 count
 ###############################################################################
 
-count_seqs <- function(p) {
+count_seqs <- function(p, pattern) {
   n <- readFastq(p) %>% sread %>% as.character() %>% length()
-  sample <- basename(p) %>% sub(x = ., pattern = "_R1.*", replacement = "")
+  sample <- extract_sample_name(p, pattern)
   output <- data.frame(sample = sample, nseq = n)
   return(output)
-}  
-  
+}
+
 seq_counts_df <- foreach(i = rawR1, .combine=rbind) %dopar% {
-  count_seqs(i)
+  count_seqs(i, PATTERN_R1)
 }
 
 ###############################################################################
@@ -119,7 +139,8 @@ qa_means <- qa_df %>%
             group_by(lane) %>%
             summarize(mean_q = sum(Score*Count)/sum(Count))
 
-qa_means$lane <- qa_means$lane %>% sub(x = ., pattern = "_R1.*", replacement = "")
+# Extract sample names consistently using the pattern
+qa_means$lane <- sapply(qa_means$lane, function(x) extract_sample_name(x, PATTERN_R1))
 qa_means2counts <- left_join(x = qa_means, y = seq_counts_df, by = c("lane" = "sample"))
 
 text_size <- 2
@@ -129,7 +150,6 @@ p_r1 <- ggplot(data = qa_means2counts, aes(x = mean_q, y = nseq)) +
         ylab("Read counts (log)") +
         xlab("Mean quality score (R1)") +
         geom_text(aes(label=as.character(lane)), hjust=0.5, vjust=-1, size = text_size)
-
 
 file_p_r1 <- paste(OUTPUT_DIR,"r1_mean_q_vs_nseq.png", sep = "/")
 ggsave(p_r1, filename = file_p_r1, 
@@ -145,7 +165,8 @@ qa_means <- qa_df %>%
             group_by(lane) %>%
             summarize(mean_q = sum(Score*Count)/sum(Count))
 
-qa_means$lane <- qa_means$lane %>% sub(x = ., pattern = "_R2.*", replacement = "")
+# Extract sample names consistently using the pattern
+qa_means$lane <- sapply(qa_means$lane, function(x) extract_sample_name(x, PATTERN_R2))
 qa_means2counts <- left_join(x = qa_means, y = seq_counts_df, by = c("lane" = "sample"))
 
 text_size <- 2
@@ -180,7 +201,6 @@ file_p_hist_log <- paste(OUTPUT_DIR,"samples_hist_log.png", sep = "/")
 ggsave(samples_hist_log_p, filename = file_p_hist_log, 
        device = "png", width = 5, height = 4, dpi = 300)
 
-
 ###############################################################################
 ### 10. Estimate % of Phix sequences
 ###############################################################################
@@ -203,7 +223,8 @@ phix_counts_df <- foreach(i = rawR1, .combine=rbind) %dopar% {
 
 text_size <- 6
 
-X <- data.frame(sample = phix_counts_df$file %>% sub(x = ., pattern = ".*/", replacement = ""),
+# Extract sample names consistently
+X <- data.frame(sample = sapply(phix_counts_df$file, function(x) extract_sample_name(x, PATTERN_R1)),
                 perc = 100*phix_counts_df$nphix/phix_counts_df$n,
                 nphix = phix_counts_df$nphix + 1)
 
