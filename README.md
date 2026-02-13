@@ -143,6 +143,7 @@ To see the help run ```./modules/2-preprocess_pipeline.sh --help```
 - `--pvalue NUM`: p-value for PEAR [default=0.01]
 - `--plot t|f`: Produce QC plots [default=f]
 - `--sample_name STR`: Name prefix [default=metagenomex]
+- `--seed NUM`: Random seed for subsampling [default=123]
 - `--subsample t|f`: Subsample to 10k reads [default=f]
 - `--trim_adapters t|f`: Remove adapters [default=f]
 
