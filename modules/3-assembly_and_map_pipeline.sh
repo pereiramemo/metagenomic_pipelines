@@ -175,7 +175,7 @@ if ! [[ "${MIN_CONTIG_LENGTH}" =~ ^[0-9]+$ ]]; then
 fi
 
 ###############################################################################
-### 5 Check tools and conf variables
+### 5. Check tools and conf variables
 ###############################################################################
 
 check_dependencies
@@ -183,14 +183,14 @@ check_dependencies
 check_file "${picard}" "Picard jar"
 
 ###############################################################################
-### 4. Check mandatory files
+### 6. Check mandatory files
 ###############################################################################
 
 check_file "${R1}" "read1"
 check_file "${R2}" "read2"
 
 ###############################################################################
-### 5. Create output folder
+### 7. Create output folder
 ###############################################################################
 
 if [[ -d "${OUTPUT_DIR}" ]]; then
@@ -201,8 +201,8 @@ if [[ -d "${OUTPUT_DIR}" ]]; then
       exit 1
     }
   else
-    log_warn "Output directory '${OUTPUT_DIR}' already exists; use --overwrite t to overwrite."
-    exit 0
+    log_error "Output directory '${OUTPUT_DIR}' already exists; use --overwrite t to overwrite."
+    exit 1
   fi
 fi
 
@@ -214,8 +214,11 @@ if [[ -n "${ASSEM_DIR}" ]]; then
   }
 fi
 
+# Set up trap to clean up tmp directory on exit (success or failure)
+trap 'rm -rf "${OUTPUT_DIR}/tmp" 2>/dev/null' EXIT
+
 ###############################################################################
-### 6. De novo assembly (if ASSEM_DIR not provided)
+### 8. De novo assembly (if ASSEM_DIR not provided)
 ###############################################################################
 
 ASSEMBLY_FILE=""
@@ -243,7 +246,7 @@ fi
 check_file "${ASSEMBLY_FILE}" "assembly file"
 
 ###############################################################################
-### 7. Map short reads
+### 9. Map short reads
 ###############################################################################
 
 log "Checking number of assembled contigs in '${ASSEMBLY_FILE}'..."
@@ -326,7 +329,7 @@ log "Indexing final duplicate-removed BAM..."
 }
 
 ###############################################################################
-### 8. Clean
+### 10. Clean
 ###############################################################################
 
 log "Removing intermediate mapping files..."
@@ -336,10 +339,7 @@ rm -f "${OUTPUT_DIR}/${SAMPLE_NAME}.sam" \
   exit 1
 }
 
-rm -rf "${OUTPUT_DIR}/tmp" || {
-  log_error "Failed to remove temporary directory '${OUTPUT_DIR}/tmp'."
-  exit 1
-}
+# Note: tmp directory is cleaned up automatically by trap on exit
 
 if [[ -z "${ASSEM_DIR}" ]]; then
   # Remove MEGAHIT intermediate contigs but keep main assembly
@@ -352,7 +352,7 @@ if [[ -z "${ASSEM_DIR}" ]]; then
 fi
 
 ###############################################################################
-### 9. Exit
+### 11. Exit
 ###############################################################################
 
 log "${GREEN}assembly_and_map_pipeline.sh exited successfully.${NC}"
