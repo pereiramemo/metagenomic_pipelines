@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###############################################################################
-### mg-clust_module-1.bash
+### 3-assembly_and_map_pipeline.sh
 ### De novo assembly + read mapping + duplicate removal
 ###############################################################################
 
@@ -180,7 +180,11 @@ fi
 
 check_dependencies
 
-check_file "${picard}" "Picard jar"
+# Check picard - can be either a command or jar file
+if ! command -v picard >/dev/null 2>&1 && [[ ! -f "${picard}" ]]; then
+    log_error "Picard not found in PATH or as jar file: ${picard}"
+    exit 1
+fi
 
 ###############################################################################
 ### 6. Check mandatory files
@@ -255,7 +259,7 @@ ASSEMBLY_FILE_NSEQ=$(grep -c ">" "${ASSEMBLY_FILE}" || echo 0)
 if (( ASSEMBLY_FILE_NSEQ < 5 )); then
   log_warn "Not enough assembled sequences to continue (${ASSEMBLY_FILE_NSEQ} < 5). Exiting gracefully."
   # Distinguish from success but not a hard error
-  exit 2
+  exit 1
 fi
 
 log "Found ${ASSEMBLY_FILE_NSEQ} contigs. Proceeding with mapping."
@@ -267,22 +271,11 @@ log "Indexing assembly with BWA..."
   exit 1
 }
 
-# Map reads
-log "Mapping reads with BWA-MEM..."
-"${bwa}" mem -M -t "${NSLOTS}" "${ASSEMBLY_FILE}" "${R1}" "${R2}" > \
-  "${OUTPUT_DIR}/${SAMPLE_NAME}.sam" || {
-  log_error "bwa mem failed."
-  exit 1
-}
-
-# Convert to BAM and filter high-quality primary alignments
-log "Converting SAM to BAM and filtering (q>=10, primary alignments)..."
-"${samtools}" view \
-  -@ "${NSLOTS}" \
-  -q 10 \
-  -F 260 \
-  -b "${OUTPUT_DIR}/${SAMPLE_NAME}.sam" > "${OUTPUT_DIR}/${SAMPLE_NAME}.bam" || {
-  log_error "samtools view (SAM→BAM) failed."
+# Map reads and convert directly to BAM (avoid huge SAM files)
+log "Mapping reads with BWA-MEM and converting to BAM (q>=10, primary alignments)..."
+"${bwa}" mem -M -t "${NSLOTS}" "${ASSEMBLY_FILE}" "${R1}" "${R2}" | \
+  "${samtools}" view -@ "${NSLOTS}" -q 10 -F 260 -b > "${OUTPUT_DIR}/${SAMPLE_NAME}.bam" || {
+  log_error "bwa mem or samtools view failed."
   exit 1
 }
 
@@ -333,10 +326,15 @@ log "Indexing final duplicate-removed BAM..."
 ###############################################################################
 
 log "Removing intermediate mapping files..."
-rm -f "${OUTPUT_DIR}/${SAMPLE_NAME}.sam" \
-      "${OUTPUT_DIR}/${SAMPLE_NAME}.bam" || {
-  log_error "Failed to remove intermediate SAM/BAM files."
+rm -f "${OUTPUT_DIR}/${SAMPLE_NAME}.bam" || {
+  log_error "Failed to remove intermediate BAM file."
   exit 1
+}
+
+# Remove BWA index files
+log "Removing BWA index files..."
+rm -f "${ASSEMBLY_FILE}".{amb,ann,bwt,pac,sa} || {
+  log_warn "Failed to remove some BWA index files (non-fatal)."
 }
 
 # Note: tmp directory is cleaned up automatically by trap on exit
