@@ -43,7 +43,7 @@ check_file() {
 
 show_usage() {
 cat <<EOF
-Usage: preprocess_pipeline.bash [OPTIONS]
+Usage: $(basename "$0") [OPTIONS]
 
 Required:
   --reads FILE          R1 file
@@ -64,6 +64,7 @@ Optional:
   --pvalue NUM          p-value for PEAR (default 0.01)
   --plot t|f            Produce QC plots (default f)
   --sample_name STR     Name prefix (default metagenomex)
+  --seed NUM            Random seed for subsampling (default 123)
   --subsample t|f       Subsample to 10k reads (default f)
   --trim_adapters t|f   Remove adapters (default f)
   --help                Show this help
@@ -90,6 +91,7 @@ PLOT="f"
 R1=""
 R2=""
 SAMPLE_NAME="metagenomex"
+SEED=123
 SUBSAMPLE="f"
 TRIM_ADAPTERS="f"
 
@@ -118,7 +120,7 @@ check_cmd getopt
 ARGS=$(getopt -o '' \
   --long help,clean:,compress:,merger:,min_length:,min_overlap:,min_qual:,nslots:,\
 output_dir:,output_pe:,output_merged:,overwrite:,pvalue:,plot:,reads:,reads2:,\
-sample_name:,subsample:,trim_adapters: \
+sample_name:,seed:,subsample:,trim_adapters: \
   -n "$(basename "$0")" -- "$@" \
   ) || {
   log_error "Failed to parse arguments."
@@ -147,6 +149,7 @@ while true; do
     --reads) R1="$2"; shift 2 ;;
     --reads2) R2="$2"; shift 2 ;;
     --sample_name) SAMPLE_NAME="$2"; shift 2 ;;
+    --seed) SEED="$2"; shift 2 ;;
     --subsample) SUBSAMPLE="$2"; shift 2 ;;
     --trim_adapters) TRIM_ADAPTERS="$2"; shift 2 ;;
     --) shift; break ;;
@@ -175,12 +178,18 @@ for flag in CLEAN COMPRESS OUTPUT_PE OUTPUT_MERGED OVERWRITE SUBSAMPLE TRIM_ADAP
 done
 
 # Validate numeric parameters
-for num in MIN_LENGTH MIN_OVERLAP MIN_QUAL NSLOTS; do
+for num in MIN_LENGTH MIN_OVERLAP MIN_QUAL NSLOTS SEED; do
     if ! [[ "${!num}" =~ ^[0-9]+$ ]]; then
         log_error "Parameter ${num} must be numeric (got '${!num}')."
         exit 1
     fi
 done
+
+# Validate PVALUE (float)
+if ! [[ "${PVALUE}" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+    log_error "Parameter PVALUE must be numeric (got '${PVALUE}')."
+    exit 1
+fi
 
 # Validate merger
 if [[ "${MERGER}" != "pear" && "${MERGER}" != "bbmerge" ]]; then
@@ -258,11 +267,15 @@ elif [[ -n "${TEST_FILE_GZIP}" ]]; then
     UNCOMPRESSED="t"
 else
     log "Linking original FASTQ files..."
-    if ! ln -s "${R1}" "${OUTPUT_DIR}/${SAMPLE_NAME}_R1-00.fastq"; then
+    # Use absolute paths for symlinks to avoid broken links
+    R1_ABS="$(realpath "${R1}")"
+    R2_ABS="$(realpath "${R2}")"
+
+    if ! ln -s "${R1_ABS}" "${OUTPUT_DIR}/${SAMPLE_NAME}_R1-00.fastq"; then
         log_error "ln -s R1 failed"
         exit 1
     fi
-    if ! ln -s "${R2}" "${OUTPUT_DIR}/${SAMPLE_NAME}_R2-00.fastq"; then
+    if ! ln -s "${R2_ABS}" "${OUTPUT_DIR}/${SAMPLE_NAME}_R2-00.fastq"; then
         log_error "ln -s R2 failed"
         exit 1
     fi
@@ -275,15 +288,15 @@ fi
 ###############################################################################
 
 if [[ "${SUBSAMPLE}" == "t" ]]; then
-    log "Subsampling to 10,000 reads ..."
+    log "Subsampling to 10,000 reads (seed: ${SEED}) ..."
     R1_REDU="${OUTPUT_DIR}/${SAMPLE_NAME}_R1_redu-00.fastq"
     R2_REDU="${OUTPUT_DIR}/${SAMPLE_NAME}_R2_redu-00.fastq"
 
-    if ! "${seqtk}" sample -s123 "${R1}" 10000 > "${R1_REDU}"; then
+    if ! "${seqtk}" sample -s"${SEED}" "${R1}" 10000 > "${R1_REDU}"; then
         log_error "seqtk subsampling R1 failed"
         exit 1
     fi
-    if ! "${seqtk}" sample -s123 "${R2}" 10000 > "${R2_REDU}"; then
+    if ! "${seqtk}" sample -s"${SEED}" "${R2}" 10000 > "${R2_REDU}"; then
         log_error "seqtk subsampling R2 failed"
         exit 1
     fi
@@ -558,9 +571,12 @@ if [[ "${CLEAN}" == "t" ]]; then
         [[ -n "${R2_AT}" && -e "${R2_AT}" ]] && rm -f "${R2_AT}"
     fi
 
-    if [[ "${OUTPUT_PE}" == "t" && "${COMPRESS}" == "t" ]]; then
-        [[ -n "${R1_QC}" && -e "${R1_QC}" ]] && rm -f "${R1_QC}"
-        [[ -n "${R2_QC}" && -e "${R2_QC}" ]] && rm -f "${R2_QC}"
+    # Remove uncompressed PE QC files if they were compressed
+    if [[ "${OUTPUT_PE}" == "t" ]]; then
+        if [[ "${COMPRESS}" == "t" ]]; then
+            [[ -n "${R1_QC}" && -f "${R1_QC}" ]] && rm -f "${R1_QC}"
+            [[ -n "${R2_QC}" && -f "${R2_QC}" ]] && rm -f "${R2_QC}"
+        fi
     fi
 
     if [[ "${OUTPUT_MERGED}" == "t" ]]; then
