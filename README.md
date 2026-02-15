@@ -154,7 +154,7 @@ To see the help run ```./modules/2-preprocess_pipeline.sh --help```
 **Main tasks:**
 - De novo assembly using MEGAHIT
 - Read mapping using BWA
-- Duplicate removal using Picard
+- Duplicate removal using Picard (optional)
 - Contig length filtering
 
 To see the help run ```./modules/3-assembly_and_map_pipeline.sh --help```
@@ -171,6 +171,7 @@ To see the help run ```./modules/3-assembly_and_map_pipeline.sh --help```
 - `--min_contig_length NUM`: Minimum length of contigs to keep [default=250]
 - `--output_dir CHAR`: Output directory [default=mg-clust_output-1]
 - `--overwrite t|f`: Overwrite previous folder if present [default=f]
+- `--remove_duplicates t|f`: Remove PCR duplicates with Picard [default=f]
 
 # **Dependencies**
 
