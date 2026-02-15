@@ -68,6 +68,7 @@ Optional:
   --min_contig_length NUM    Minimum length of contigs to keep (default: 250)
   --output_dir CHAR          Output directory (default: mg-clust_output-1)
   --overwrite t|f            Overwrite previous folder if present (default: f)
+  --remove_duplicates t|f    Remove PCR duplicates with Picard (default: t)
   --help                     Print this help and exit
 
 Examples:
@@ -89,6 +90,7 @@ NSLOTS=12
 MIN_CONTIG_LENGTH=250
 OUTPUT_DIR="mg-clust_output-1"
 OVERWRITE="f"
+REMOVE_DUPLICATES="t"
 R1=""
 R2=""
 SAMPLE_NAME=""
@@ -98,7 +100,7 @@ check_cmd getopt
 
 ARGS=$(
   getopt -o '' \
-    --long help,assem_dir:,assem_preset:,nslots:,min_contig_length:,output_dir:,overwrite:,reads1:,reads2:,sample_name: \
+    --long help,assem_dir:,assem_preset:,nslots:,min_contig_length:,output_dir:,overwrite:,remove_duplicates:,reads1:,reads2:,sample_name: \
     -n "$(basename "$0")" -- "$@" \
 ) || {
   log_error "Failed to parse arguments."
@@ -126,6 +128,8 @@ while true; do
       OUTPUT_DIR="$2"; shift 2 ;;
     --overwrite)
       OVERWRITE="$2"; shift 2 ;;
+    --remove_duplicates)
+      REMOVE_DUPLICATES="$2"; shift 2 ;;
     --reads1)
       R1="$2"; shift 2 ;;
     --reads2)
@@ -157,9 +161,14 @@ for v in R1 R2 SAMPLE_NAME; do
   fi
 done
 
-# Simple validation for overwrite flag
+# Simple validation for boolean flags
 if [[ "${OVERWRITE}" != "t" && "${OVERWRITE}" != "f" ]]; then
   log_error "--overwrite must be 't' or 'f' (got '${OVERWRITE}')"
+  exit 1
+fi
+
+if [[ "${REMOVE_DUPLICATES}" != "t" && "${REMOVE_DUPLICATES}" != "f" ]]; then
+  log_error "--remove_duplicates must be 't' or 'f' (got '${REMOVE_DUPLICATES}')"
   exit 1
 fi
 
@@ -295,41 +304,57 @@ log "Indexing sorted BAM..."
   exit 1
 }
 
-# Remove duplicates with Picard
-log "Marking and removing duplicates with Picard..."
-mkdir -p "${OUTPUT_DIR}/tmp" || {
-  log_error "Failed to create temporary directory '${OUTPUT_DIR}/tmp'."
-  exit 1
-}
+# Remove duplicates with Picard (optional)
+if [[ "${REMOVE_DUPLICATES}" == "t" ]]; then
+  log "Marking and removing duplicates with Picard..."
+  mkdir -p "${OUTPUT_DIR}/tmp" || {
+    log_error "Failed to create temporary directory '${OUTPUT_DIR}/tmp'."
+    exit 1
+  }
 
-java -jar "${picard}" MarkDuplicates \
-  INPUT="${OUTPUT_DIR}/${SAMPLE_NAME}_sorted.bam" \
-  OUTPUT="${OUTPUT_DIR}/${SAMPLE_NAME}_sorted_markdup.bam" \
-  METRICS_FILE="${OUTPUT_DIR}/${SAMPLE_NAME}_sorted_markdup.metrics.txt" \
-  REMOVE_DUPLICATES=TRUE \
-  ASSUME_SORTED=TRUE \
-  MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=900 \
-  TMP_DIR="${OUTPUT_DIR}/tmp" || {
-  log_error "Picard MarkDuplicates failed."
-  exit 1
-}
+  java -jar "${picard}" MarkDuplicates \
+    INPUT="${OUTPUT_DIR}/${SAMPLE_NAME}_sorted.bam" \
+    OUTPUT="${OUTPUT_DIR}/${SAMPLE_NAME}_sorted_markdup.bam" \
+    METRICS_FILE="${OUTPUT_DIR}/${SAMPLE_NAME}_sorted_markdup.metrics.txt" \
+    REMOVE_DUPLICATES=TRUE \
+    ASSUME_SORTED=TRUE \
+    MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=900 \
+    TMP_DIR="${OUTPUT_DIR}/tmp" || {
+    log_error "Picard MarkDuplicates failed."
+    exit 1
+  }
 
-# Index final markdup BAM
-log "Indexing final duplicate-removed BAM..."
-"${samtools}" index -@ "${NSLOTS}" "${OUTPUT_DIR}/${SAMPLE_NAME}_sorted_markdup.bam" || {
-  log_error "samtools index on markdup BAM failed."
-  exit 1
-}
+  # Index final markdup BAM
+  log "Indexing final duplicate-removed BAM..."
+  "${samtools}" index -@ "${NSLOTS}" "${OUTPUT_DIR}/${SAMPLE_NAME}_sorted_markdup.bam" || {
+    log_error "samtools index on markdup BAM failed."
+    exit 1
+  }
+
+  FINAL_BAM="${OUTPUT_DIR}/${SAMPLE_NAME}_sorted_markdup.bam"
+else
+  log "Skipping duplicate removal (--remove_duplicates=f)"
+  FINAL_BAM="${OUTPUT_DIR}/${SAMPLE_NAME}_sorted.bam"
+fi
 
 ###############################################################################
 ### 10. Clean
 ###############################################################################
 
 log "Removing intermediate mapping files..."
+# Always remove the initial unsorted BAM
 rm -f "${OUTPUT_DIR}/${SAMPLE_NAME}.bam" || {
   log_error "Failed to remove intermediate BAM file."
   exit 1
 }
+
+# If duplicates were removed, also remove the sorted BAM (it's intermediate)
+if [[ "${REMOVE_DUPLICATES}" == "t" ]]; then
+  rm -f "${OUTPUT_DIR}/${SAMPLE_NAME}_sorted.bam" \
+        "${OUTPUT_DIR}/${SAMPLE_NAME}_sorted.bam.bai" || {
+    log_warn "Failed to remove intermediate sorted BAM files (non-fatal)."
+  }
+fi
 
 # Remove BWA index files
 log "Removing BWA index files..."
@@ -354,4 +379,5 @@ fi
 ###############################################################################
 
 log "${GREEN}assembly_and_map_pipeline.sh exited successfully.${NC}"
+log "Final BAM file: ${FINAL_BAM}"
 exit 0

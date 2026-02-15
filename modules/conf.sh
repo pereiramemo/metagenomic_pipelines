@@ -55,6 +55,10 @@ pigz="pigz"
 fq2fa="${MODULES_DIR}/resources/fq2fa.sh"
 plots="${MODULES_DIR}/resources/plots.R"
 quality_check="${MODULES_DIR}/1.2-quality_check.R"
+megahit="megahit"
+bwa="bwa"
+samtools="samtools"
+picard="picard" # Assuming picard is available as a command (e.g., via conda), otherwise this should point to the jar file
 
 ###############################################################################
 # files
