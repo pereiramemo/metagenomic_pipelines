@@ -46,6 +46,47 @@ check_file() {
   fi
 }
 
+# Find contigs file in assembly directory
+# Searches for contigs files with various extensions in multiple locations
+find_contigs_file() {
+  local assem_dir="$1"
+  local sample_name="$2"
+  local extensions=("contigs.fa" "contigs.fasta" "contigs.fna" "fa" "fasta" "fna")
+  local search_paths=(
+    "${assem_dir}/${sample_name}"
+    "${assem_dir}"
+  )
+
+  # First, look for files with sample name prefix
+  for dir in "${search_paths[@]}"; do
+    for ext in "${extensions[@]}"; do
+      local candidate="${dir}/${sample_name}.${ext}"
+      if [[ -f "${candidate}" ]]; then
+        echo "${candidate}"
+        return 0
+      fi
+    done
+  done
+
+  # If not found, look for any .contigs.{fa,fasta,fna} file in the directories
+  for dir in "${search_paths[@]}"; do
+    for ext in fa fasta fna; do
+      local pattern="${dir}/*.contigs.${ext}"
+      for candidate in ${pattern}; do
+        if [[ -f "${candidate}" ]]; then
+          log_warn "Found contigs file '${candidate}' but it doesn't match expected pattern '${sample_name}.contigs.*'"
+          log_warn "Using it anyway. Consider renaming or using --contigs to specify explicitly."
+          echo "${candidate}"
+          return 0
+        fi
+      done
+    done
+  done
+
+  # Not found
+  return 1
+}
+
 ###############################################################################
 ### 2. Define help
 ###############################################################################
@@ -60,8 +101,11 @@ Required:
   --sample_name CHAR         Sample name used to name the files
 
 Optional:
+  --contigs CHAR             Path to pre-assembled contigs file (FASTA format)
+                             Takes precedence over --assem_dir
   --assem_dir CHAR           Directory with previously computed assemblies
-                             (format: dirname/SAMPLE_NAME/SAMPLE_NAME.contigs.fa)
+                             Will search for: SAMPLE_NAME.contigs.{fa,fasta,fna}
+                             in ASSEM_DIR/ or ASSEM_DIR/SAMPLE_NAME/
   --assem_preset CHAR        MEGAHIT preset to generate assembly
                              (default: meta-sensitive)
   --nslots NUM               Number of threads used (default: 12)
@@ -72,9 +116,22 @@ Optional:
   --help                     Print this help and exit
 
 Examples:
+  # Run de novo assembly with MEGAHIT:
   $(basename "$0") \\
     --reads1 sample_R1.fastq.gz --reads2 sample_R2.fastq.gz \\
     --sample_name Sample1 --nslots 16 --output_dir Sample1_map
+
+  # Use pre-assembled contigs (direct path):
+  $(basename "$0") \\
+    --reads1 sample_R1.fastq.gz --reads2 sample_R2.fastq.gz \\
+    --sample_name Sample1 --contigs /path/to/Sample1.contigs.fa \\
+    --output_dir Sample1_map
+
+  # Use pre-assembled contigs (search in directory):
+  $(basename "$0") \\
+    --reads1 sample_R1.fastq.gz --reads2 sample_R2.fastq.gz \\
+    --sample_name Sample1 --assem_dir /path/to/assemblies \\
+    --output_dir Sample1_map
 
 EOF
 }
@@ -84,6 +141,7 @@ EOF
 ###############################################################################
 
 # Defaults (can be overridden by CLI)
+CONTIGS=""
 ASSEM_DIR=""
 ASSEM_PRESET="meta-sensitive"
 NSLOTS=12
@@ -100,7 +158,7 @@ check_cmd getopt
 
 ARGS=$(
   getopt -o '' \
-    --long help,assem_dir:,assem_preset:,nslots:,min_contig_length:,output_dir:,overwrite:,remove_duplicates:,reads1:,reads2:,sample_name: \
+    --long help,contigs:,assem_dir:,assem_preset:,nslots:,min_contig_length:,output_dir:,overwrite:,remove_duplicates:,reads1:,reads2:,sample_name: \
     -n "$(basename "$0")" -- "$@" \
 ) || {
   log_error "Failed to parse arguments."
@@ -116,6 +174,8 @@ while true; do
       show_usage
       exit 0
       ;;
+    --contigs)
+      CONTIGS="$2"; shift 2 ;;
     --assem_dir)
       ASSEM_DIR="$2"; shift 2 ;;
     --assem_preset)
@@ -167,7 +227,7 @@ if [[ "${OVERWRITE}" != "t" && "${OVERWRITE}" != "f" ]]; then
   exit 1
 fi
 
-if [[ "${REMOVE_DUPLICATES}" != "t" && "${REMOVE_DUPLICATES}" != "f" ]]; then
+if [[ "$ {REMOVE_DUPLICATES}" != "t" && "${REMOVE_DUPLICATES}" != "f" ]]; then
   log_error "--remove_duplicates must be 't' or 'f' (got '${REMOVE_DUPLICATES}')"
   exit 1
 fi
@@ -219,8 +279,8 @@ if [[ -d "${OUTPUT_DIR}" ]]; then
   fi
 fi
 
-# Create base output directory if assembly is not run by megahit (when ASSEM_DIR is given)
-if [[ -n "${ASSEM_DIR}" ]]; then
+# Create base output directory if assembly is not run by megahit (when CONTIGS or ASSEM_DIR is given)
+if [[ -n "${CONTIGS}" || -n "${ASSEM_DIR}" ]]; then
   mkdir -p "${OUTPUT_DIR}" || {
     log_error "Failed to create output directory '${OUTPUT_DIR}'."
     exit 1
@@ -231,12 +291,46 @@ fi
 trap 'rm -rf "${OUTPUT_DIR}/tmp" 2>/dev/null' EXIT
 
 ###############################################################################
-### 8. De novo assembly (if ASSEM_DIR not provided)
+### 8. De novo assembly or identify external contigs
 ###############################################################################
 
 ASSEMBLY_FILE=""
 
-if [[ -z "${ASSEM_DIR}" ]]; then
+# Priority 1: Use explicitly provided contigs file
+if [[ -n "${CONTIGS}" ]]; then
+  log "Using externally provided contigs file: ${CONTIGS}"
+  ASSEMBLY_FILE="${CONTIGS}"
+  check_file "${ASSEMBLY_FILE}" "contigs file"
+
+# Priority 2: Search for contigs in provided assembly directory
+elif [[ -n "${ASSEM_DIR}" ]]; then
+  log "Searching for contigs file in assembly directory: ${ASSEM_DIR}"
+
+  # Validate assembly directory exists
+  if [[ ! -d "${ASSEM_DIR}" ]]; then
+    log_error "Assembly directory '${ASSEM_DIR}' does not exist or is not a directory."
+    exit 1
+  fi
+
+  # Try to find contigs file
+  ASSEMBLY_FILE=$(find_contigs_file "${ASSEM_DIR}" "${SAMPLE_NAME}")
+
+  if [[ -z "${ASSEMBLY_FILE}" ]]; then
+    log_error "Could not find contigs file for sample '${SAMPLE_NAME}' in '${ASSEM_DIR}'."
+    log_error "Searched in:"
+    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}/${SAMPLE_NAME}.{contigs.fa,contigs.fasta,contigs.fna,fa,fasta,fna}"
+    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}.{contigs.fa,contigs.fasta,contigs.fna,fa,fasta,fna}"
+    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}/*.contigs.{fa,fasta,fna}"
+    log_error "  - ${ASSEM_DIR}/*.contigs.{fa,fasta,fna}"
+    log_error ""
+    log_error "Use --contigs to specify the exact path to your contigs file."
+    exit 1
+  fi
+
+  log "Found contigs file: ${ASSEMBLY_FILE}"
+
+# Priority 3: Run de novo assembly with MEGAHIT
+else
   log "Running MEGAHIT assembly..."
 
   "${megahit}" \
@@ -251,12 +345,8 @@ if [[ -z "${ASSEM_DIR}" ]]; then
   log "MEGAHIT completed."
 
   ASSEMBLY_FILE="${OUTPUT_DIR}/${SAMPLE_NAME}.contigs.fa"
-else
-  ASSEMBLY_FILE="${ASSEM_DIR}/${SAMPLE_NAME}/${SAMPLE_NAME}.contigs.fa"
+  check_file "${ASSEMBLY_FILE}" "assembly file"
 fi
-
-# Check assembly file exists
-check_file "${ASSEMBLY_FILE}" "assembly file"
 
 ###############################################################################
 ### 9. Map short reads
@@ -356,15 +446,19 @@ if [[ "${REMOVE_DUPLICATES}" == "t" ]]; then
   }
 fi
 
-# Remove BWA index files
-log "Removing BWA index files..."
-rm -f "${ASSEMBLY_FILE}".{amb,ann,bwt,pac,sa} || {
-  log_warn "Failed to remove some BWA index files (non-fatal)."
-}
+# Remove BWA index files (only if we created the assembly ourselves)
+if [[ -z "${CONTIGS}" && -z "${ASSEM_DIR}" ]]; then
+  log "Removing BWA index files..."
+  rm -f "${ASSEMBLY_FILE}".{amb,ann,bwt,pac,sa} || {
+    log_warn "Failed to remove some BWA index files (non-fatal)."
+  }
+else
+  log "Keeping BWA index files (external contigs were used)."
+fi
 
 # Note: tmp directory is cleaned up automatically by trap on exit
 
-if [[ -z "${ASSEM_DIR}" ]]; then
+if [[ -z "${CONTIGS}" && -z "${ASSEM_DIR}" ]]; then
   # Remove MEGAHIT intermediate contigs but keep main assembly
   if [[ -d "${OUTPUT_DIR}/intermediate_contigs" ]]; then
     log "Removing MEGAHIT intermediate contigs..."

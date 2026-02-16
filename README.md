@@ -149,10 +149,10 @@ To see the help run ```./modules/2-preprocess_pipeline.sh --help```
 
 ## 3-assembly_and_map_pipeline.sh
 
-[3-assembly_and_map_pipeline.sh](modules/3-assembly_and_map_pipeline.sh): This pipeline performs de novo assembly of metagenomic reads and maps reads back to the assembled contigs.
+[3-assembly_and_map_pipeline.sh](modules/3-assembly_and_map_pipeline.sh): This pipeline performs de novo assembly of metagenomic reads (or uses pre-assembled contigs) and maps reads back to the assembled contigs.
 
 **Main tasks:**
-- De novo assembly using MEGAHIT
+- De novo assembly using MEGAHIT (optional - can use pre-assembled contigs)
 - Read mapping using BWA
 - Duplicate removal using Picard (optional)
 - Contig length filtering
@@ -165,7 +165,8 @@ To see the help run ```./modules/3-assembly_and_map_pipeline.sh --help```
 - `--sample_name CHAR`: Sample name used to name the files
 
 **Optional parameters:**
-- `--assem_dir CHAR`: Directory with previously computed assemblies (format: dirname/SAMPLE_NAME/SAMPLE_NAME.contigs.fa)
+- `--contigs CHAR`: Path to pre-assembled contigs file (FASTA format). Takes precedence over `--assem_dir`
+- `--assem_dir CHAR`: Directory with previously computed assemblies. Will search for `SAMPLE_NAME.contigs.{fa,fasta,fna}` in `ASSEM_DIR/` or `ASSEM_DIR/SAMPLE_NAME/`
 - `--assem_preset CHAR`: MEGAHIT preset to generate assembly [default=meta-sensitive]
 - `--nslots NUM`: Number of threads used [default=12]
 - `--min_contig_length NUM`: Minimum length of contigs to keep [default=250]
