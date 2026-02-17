@@ -373,6 +373,13 @@ else
   check_file "${ASSEMBLY_FILE}" "assembly file"
 fi
 
+# Resolve symbolic links to avoid issues with BWA index file locations
+if [[ -L "${ASSEMBLY_FILE}" ]]; then
+  ASSEMBLY_FILE_ORIGINAL="${ASSEMBLY_FILE}"
+  ASSEMBLY_FILE=$(readlink -f "${ASSEMBLY_FILE}")
+  log "Resolved symbolic link: ${ASSEMBLY_FILE_ORIGINAL} -> ${ASSEMBLY_FILE}"
+fi
+
 # Handle compressed assembly files
 if [[ "${ASSEMBLY_FILE}" == *.gz ]]; then
   log "Detected gzipped assembly file. Decompressing..."
