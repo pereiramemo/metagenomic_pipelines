@@ -48,10 +48,12 @@ check_file() {
 
 # Find contigs file in assembly directory
 # Searches for contigs files with various extensions in multiple locations
+# Supports both compressed (.gz) and uncompressed files
 find_contigs_file() {
   local assem_dir="$1"
   local sample_name="$2"
-  local extensions=("contigs.fa" "contigs.fasta" "contigs.fna" "fa" "fasta" "fna")
+  local extensions=("contigs.fa" "contigs.fasta" "contigs.fna" "fa" "fasta" "fna" \
+                    "contigs.fa.gz" "contigs.fasta.gz" "contigs.fna.gz" "fa.gz" "fasta.gz" "fna.gz")
   local search_paths=(
     "${assem_dir}/${sample_name}"
     "${assem_dir}"
@@ -68,20 +70,34 @@ find_contigs_file() {
     done
   done
 
-  # If not found, look for any .contigs.{fa,fasta,fna} file in the directories
+  # If not found, look for any .contigs.{fa,fasta,fna}[.gz] file in the directories
+  # Enable nullglob so unmatched patterns expand to nothing
+  shopt -s nullglob
   for dir in "${search_paths[@]}"; do
     for ext in fa fasta fna; do
-      local pattern="${dir}/*.contigs.${ext}"
-      for candidate in ${pattern}; do
+      # Check uncompressed files
+      for candidate in "${dir}"/*.contigs."${ext}"; do
         if [[ -f "${candidate}" ]]; then
           log_warn "Found contigs file '${candidate}' but it doesn't match expected pattern '${sample_name}.contigs.*'"
           log_warn "Using it anyway. Consider renaming or using --contigs to specify explicitly."
+          shopt -u nullglob  # Disable nullglob before returning
+          echo "${candidate}"
+          return 0
+        fi
+      done
+      # Check compressed files
+      for candidate in "${dir}"/*.contigs."${ext}".gz; do
+        if [[ -f "${candidate}" ]]; then
+          log_warn "Found contigs file '${candidate}' but it doesn't match expected pattern '${sample_name}.contigs.*'"
+          log_warn "Using it anyway. Consider renaming or using --contigs to specify explicitly."
+          shopt -u nullglob  # Disable nullglob before returning
           echo "${candidate}"
           return 0
         fi
       done
     done
   done
+  shopt -u nullglob  # Disable nullglob before returning
 
   # Not found
   return 1
@@ -102,17 +118,19 @@ Required:
 
 Optional:
   --contigs CHAR             Path to pre-assembled contigs file (FASTA format)
+                             Supports both compressed (.gz) and uncompressed files
                              Takes precedence over --assem_dir
   --assem_dir CHAR           Directory with previously computed assemblies
-                             Will search for: SAMPLE_NAME.contigs.{fa,fasta,fna}
+                             Will search for: SAMPLE_NAME.contigs.{fa,fasta,fna}[.gz]
                              in ASSEM_DIR/ or ASSEM_DIR/SAMPLE_NAME/
+                             Supports both compressed (.gz) and uncompressed files
   --assem_preset CHAR        MEGAHIT preset to generate assembly
                              (default: meta-sensitive)
   --nslots NUM               Number of threads used (default: 12)
   --min_contig_length NUM    Minimum length of contigs to keep (default: 250)
   --output_dir CHAR          Output directory (default: mg-clust_output-1)
   --overwrite t|f            Overwrite previous folder if present (default: f)
-  --remove_duplicates t|f    Remove PCR duplicates with Picard (default: t)
+  --remove_duplicates t|f    Remove PCR duplicates with Picard (default: f)
   --help                     Print this help and exit
 
 Examples:
@@ -125,6 +143,12 @@ Examples:
   $(basename "$0") \\
     --reads1 sample_R1.fastq.gz --reads2 sample_R2.fastq.gz \\
     --sample_name Sample1 --contigs /path/to/Sample1.contigs.fa \\
+    --output_dir Sample1_map
+
+  # Use compressed pre-assembled contigs:
+  $(basename "$0") \\
+    --reads1 sample_R1.fastq.gz --reads2 sample_R2.fastq.gz \\
+    --sample_name Sample1 --contigs /path/to/Sample1.contigs.fa.gz \\
     --output_dir Sample1_map
 
   # Use pre-assembled contigs (search in directory):
@@ -227,7 +251,7 @@ if [[ "${OVERWRITE}" != "t" && "${OVERWRITE}" != "f" ]]; then
   exit 1
 fi
 
-if [[ "$ {REMOVE_DUPLICATES}" != "t" && "${REMOVE_DUPLICATES}" != "f" ]]; then
+if [[ "${REMOVE_DUPLICATES}" != "t" && "${REMOVE_DUPLICATES}" != "f" ]]; then
   log_error "--remove_duplicates must be 't' or 'f' (got '${REMOVE_DUPLICATES}')"
   exit 1
 fi
@@ -250,7 +274,7 @@ fi
 check_dependencies
 
 # Check picard - can be either a command or jar file
-if ! command -v picard >/dev/null 2>&1 && [[ ! -f "${picard}" ]]; then
+if ! command -v "${picard}" >/dev/null 2>&1 && [[ ! -f "${picard}" ]]; then
     log_error "Picard not found in PATH or as jar file: ${picard}"
     exit 1
 fi
@@ -295,6 +319,7 @@ trap 'rm -rf "${OUTPUT_DIR}/tmp" 2>/dev/null' EXIT
 ###############################################################################
 
 ASSEMBLY_FILE=""
+ASSEMBLY_FILE_DECOMPRESSED=""  # Track if we created a decompressed temp file
 
 # Priority 1: Use explicitly provided contigs file
 if [[ -n "${CONTIGS}" ]]; then
@@ -318,10 +343,10 @@ elif [[ -n "${ASSEM_DIR}" ]]; then
   if [[ -z "${ASSEMBLY_FILE}" ]]; then
     log_error "Could not find contigs file for sample '${SAMPLE_NAME}' in '${ASSEM_DIR}'."
     log_error "Searched in:"
-    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}/${SAMPLE_NAME}.{contigs.fa,contigs.fasta,contigs.fna,fa,fasta,fna}"
-    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}.{contigs.fa,contigs.fasta,contigs.fna,fa,fasta,fna}"
-    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}/*.contigs.{fa,fasta,fna}"
-    log_error "  - ${ASSEM_DIR}/*.contigs.{fa,fasta,fna}"
+    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}/${SAMPLE_NAME}.{contigs.fa,contigs.fasta,contigs.fna,fa,fasta,fna}[.gz]"
+    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}.{contigs.fa,contigs.fasta,contigs.fna,fa,fasta,fna}[.gz]"
+    log_error "  - ${ASSEM_DIR}/${SAMPLE_NAME}/*.contigs.{fa,fasta,fna}[.gz]"
+    log_error "  - ${ASSEM_DIR}/*.contigs.{fa,fasta,fna}[.gz]"
     log_error ""
     log_error "Use --contigs to specify the exact path to your contigs file."
     exit 1
@@ -348,6 +373,25 @@ else
   check_file "${ASSEMBLY_FILE}" "assembly file"
 fi
 
+# Handle compressed assembly files
+if [[ "${ASSEMBLY_FILE}" == *.gz ]]; then
+  log "Detected gzipped assembly file. Decompressing..."
+
+  # Create temporary decompressed file in output directory
+  ASSEMBLY_FILE_DECOMPRESSED="${OUTPUT_DIR}/$(basename "${ASSEMBLY_FILE}" .gz)"
+
+  "${gunzip}" -c "${ASSEMBLY_FILE}" > "${ASSEMBLY_FILE_DECOMPRESSED}" || {
+    log_error "Failed to decompress assembly file."
+    exit 1
+  }
+
+  log "Decompressed to: ${ASSEMBLY_FILE_DECOMPRESSED}"
+
+  # Update ASSEMBLY_FILE to point to decompressed version
+  ASSEMBLY_FILE="${ASSEMBLY_FILE_DECOMPRESSED}"
+  check_file "${ASSEMBLY_FILE}" "decompressed assembly file"
+fi
+
 ###############################################################################
 ### 9. Map short reads
 ###############################################################################
@@ -355,10 +399,10 @@ fi
 log "Checking number of assembled contigs in '${ASSEMBLY_FILE}'..."
 ASSEMBLY_FILE_NSEQ=$(grep -c ">" "${ASSEMBLY_FILE}" || echo 0)
 
-if (( ASSEMBLY_FILE_NSEQ < 5 )); then
+if (( ASSEMBLY_FILE_NSEQ < 5 )); then 
   log_warn "Not enough assembled sequences to continue (${ASSEMBLY_FILE_NSEQ} < 5). Exiting gracefully."
   # Distinguish from success but not a hard error
-  exit 1
+  exit 0
 fi
 
 log "Found ${ASSEMBLY_FILE_NSEQ} contigs. Proceeding with mapping."
@@ -382,7 +426,8 @@ log "Mapping reads with BWA-MEM and converting to BAM (q>=10, primary alignments
 log "Sorting BAM..."
 "${samtools}" sort \
   -@ "${NSLOTS}" \
-  "${OUTPUT_DIR}/${SAMPLE_NAME}.bam" > "${OUTPUT_DIR}/${SAMPLE_NAME}_sorted.bam" || {
+  -o "${OUTPUT_DIR}/${SAMPLE_NAME}_sorted.bam" \
+  "${OUTPUT_DIR}/${SAMPLE_NAME}.bam" || {
   log_error "samtools sort failed."
   exit 1
 }
@@ -446,14 +491,18 @@ if [[ "${REMOVE_DUPLICATES}" == "t" ]]; then
   }
 fi
 
-# Remove BWA index files (only if we created the assembly ourselves)
-if [[ -z "${CONTIGS}" && -z "${ASSEM_DIR}" ]]; then
-  log "Removing BWA index files..."
-  rm -f "${ASSEMBLY_FILE}".{amb,ann,bwt,pac,sa} || {
-    log_warn "Failed to remove some BWA index files (non-fatal)."
+# Remove BWA index files (always cleanup since they were created by this script)
+log "Removing BWA index files..."
+rm -f "${ASSEMBLY_FILE}".{amb,ann,bwt,pac,sa} || {
+  log_warn "Failed to remove some BWA index files (non-fatal)."
+}
+
+# Remove temporary decompressed assembly file if created
+if [[ -n "${ASSEMBLY_FILE_DECOMPRESSED}" && -f "${ASSEMBLY_FILE_DECOMPRESSED}" ]]; then
+  log "Removing temporary decompressed assembly file..."
+  rm -f "${ASSEMBLY_FILE_DECOMPRESSED}" || {
+    log_warn "Failed to remove temporary decompressed assembly file (non-fatal)."
   }
-else
-  log "Keeping BWA index files (external contigs were used)."
 fi
 
 # Note: tmp directory is cleaned up automatically by trap on exit

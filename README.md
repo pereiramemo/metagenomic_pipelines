@@ -153,9 +153,17 @@ To see the help run ```./modules/2-preprocess_pipeline.sh --help```
 
 **Main tasks:**
 - De novo assembly using MEGAHIT (optional - can use pre-assembled contigs)
-- Read mapping using BWA
+- Read mapping using BWA-MEM with quality filtering (q≥10, primary alignments only)
+- BAM file sorting and indexing
 - Duplicate removal using Picard (optional)
-- Contig length filtering
+- Automatic cleanup of intermediate files and BWA indices
+
+**Key features:**
+- Flexible input: run de novo assembly or use existing contigs (supports .gz compressed files)
+- Smart contig file discovery with multiple naming patterns
+- Quality control: skips processing if < 5 contigs (graceful exit)
+- Memory-efficient: direct BAM conversion (avoids large SAM files)
+- Clean output: removes intermediate files and BWA indices automatically
 
 To see the help run ```./modules/3-assembly_and_map_pipeline.sh --help```
 
@@ -165,14 +173,20 @@ To see the help run ```./modules/3-assembly_and_map_pipeline.sh --help```
 - `--sample_name CHAR`: Sample name used to name the files
 
 **Optional parameters:**
-- `--contigs CHAR`: Path to pre-assembled contigs file (FASTA format). Takes precedence over `--assem_dir`
-- `--assem_dir CHAR`: Directory with previously computed assemblies. Will search for `SAMPLE_NAME.contigs.{fa,fasta,fna}` in `ASSEM_DIR/` or `ASSEM_DIR/SAMPLE_NAME/`
+- `--contigs CHAR`: Path to pre-assembled contigs file (FASTA format). Supports both compressed (.gz) and uncompressed files. Takes precedence over `--assem_dir`
+- `--assem_dir CHAR`: Directory with previously computed assemblies. Will search for `SAMPLE_NAME.contigs.{fa,fasta,fna}[.gz]` in `ASSEM_DIR/` or `ASSEM_DIR/SAMPLE_NAME/`. Supports both compressed (.gz) and uncompressed files
 - `--assem_preset CHAR`: MEGAHIT preset to generate assembly [default=meta-sensitive]
 - `--nslots NUM`: Number of threads used [default=12]
 - `--min_contig_length NUM`: Minimum length of contigs to keep [default=250]
 - `--output_dir CHAR`: Output directory [default=mg-clust_output-1]
 - `--overwrite t|f`: Overwrite previous folder if present [default=f]
 - `--remove_duplicates t|f`: Remove PCR duplicates with Picard [default=f]
+
+**Output files:**
+- `SAMPLE_NAME_sorted.bam` (or `SAMPLE_NAME_sorted_markdup.bam` if duplicates removed): Final BAM file
+- `SAMPLE_NAME_sorted.bam.bai` (or `SAMPLE_NAME_sorted_markdup.bam.bai`): BAM index
+- `SAMPLE_NAME.contigs.fa`: Assembly file (if MEGAHIT was run)
+- `SAMPLE_NAME_sorted_markdup.metrics.txt`: Picard duplicate metrics (if duplicates removed)
 
 # **Dependencies**
 
