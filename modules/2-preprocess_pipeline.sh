@@ -12,31 +12,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/conf.sh"
 
-# Colors
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-GREEN='\033[0;32m'
-NC='\033[0m'
-
-log()       { echo -e "[INFO] $*"; }
-log_warn()  { echo -e "${YELLOW}[WARN]${NC} $*" >&2; }
-log_error() { echo -e "${RED}[ERROR]${NC} $*" >&2; }
-
-# Helpers
-check_cmd() {
-    if ! command -v "$1" >/dev/null 2>&1; then
-        log_error "Required tool '$1' not found in PATH."
-        exit 1
-    fi
-}
-
-check_file() {
-    if [[ ! -f "$1" ]]; then
-        log_error "File not found: $1"
-        exit 1
-    fi
-}
-
 ###############################################################################
 # 2. Help
 ###############################################################################

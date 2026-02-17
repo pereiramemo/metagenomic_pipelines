@@ -75,6 +75,19 @@ fi
 # functions
 ###############################################################################
 
+# Color codes for logging
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+log()        { echo -e "[INFO] $*"; }
+log_warn()   { echo -e "${YELLOW}[WARN]${NC} $*" >&2; }
+log_error()  { echo -e "${RED}[ERROR]${NC} $*" >&2; }
+
+# Function to check for required tools and dependencies
+
 function check_dependencies {
   local missing_tools=()
   
@@ -134,18 +147,37 @@ function check_dependencies {
   
   # Report missing tools
   if [[ ${#missing_tools[@]} -gt 0 ]]; then
-    echo "ERROR: The following required tools are not installed or not in PATH:"
-    printf '  - %s\n' "${missing_tools[@]}"
-    echo ""
-    echo "Please activate the metagenomic_pipeline conda environment:"
-    echo "  mamba activate metagenomic_pipeline"
+    log_error "The following required tools are not installed or not in PATH:"
+    printf '  - %s\n' "${missing_tools[@]}" >&2
+    log_error ""
+    log_error "Please activate the metagenomic_pipeline conda environment:"
+    log_error "  mamba activate metagenomic_pipeline"
     return 1
   fi
   
   return 0
 }
 
-# functions
+# Function to check that a command exists in PATH
+check_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    log_error "Required command '$1' not found in PATH."
+    exit 1
+  fi
+}
+
+# Function to check that a file exists
+check_file() {
+  local f="$1"
+  local label="${2:-file}"
+  if [[ ! -f "$f" ]]; then
+    log_error "$label '$f' does not exist or is not a regular file."
+    exit 1
+  fi
+}
+
+
+# Function to count the number of reads in a FASTQ file
 function count_fastq {
 
   N=$(wc -l  "${1}" | cut -f1 -d" ")
@@ -154,6 +186,7 @@ function count_fastq {
 
 }
 
+# Function to count the number of sequences in a FASTA file
 function count_fasta {
 
   N=$(egrep -c ">" "${1}")
@@ -161,6 +194,7 @@ function count_fasta {
 
 }
 
+# Function to compute the mean length of sequences in a FASTA or FASTQ file
 function compute_mean_length {
 
   N=$(infoseq "${1}" | \

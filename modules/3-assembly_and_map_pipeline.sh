@@ -16,39 +16,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/conf.sh"
 
 ###############################################################################
-### 1.1 Helper functions
+### 1.1 Helper function
 ###############################################################################
-
-RED='\033[0;31m'
-YELLOW='\033[1;33m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
-
-log()        { echo -e "[INFO] $*"; }
-log_warn()   { echo -e "${YELLOW}[WARN]${NC} $*" >&2; }
-log_error()  { echo -e "${RED}[ERROR]${NC} $*" >&2; }
-
-# Check that a command exists in PATH
-check_cmd() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    log_error "Required command '$1' not found in PATH."
-    exit 1
-  fi
-}
-
-# Check that a file exists
-check_file() {
-  local f="$1"
-  local label="${2:-file}"
-  if [[ ! -f "$f" ]]; then
-    log_error "$label '$f' does not exist or is not a regular file."
-    exit 1
-  fi
-}
 
 # Find contigs file in assembly directory
 # Searches for contigs files with various extensions in multiple locations
 # Supports both compressed (.gz) and uncompressed files
+
 find_contigs_file() {
   local assem_dir="$1"
   local sample_name="$2"
@@ -268,16 +242,10 @@ if ! [[ "${MIN_CONTIG_LENGTH}" =~ ^[0-9]+$ ]]; then
 fi
 
 ###############################################################################
-### 5. Check tools and conf variables
+### 5. Check tools
 ###############################################################################
 
 check_dependencies
-
-# Check picard - can be either a command or jar file
-if ! command -v "${picard}" >/dev/null 2>&1 && [[ ! -f "${picard}" ]]; then
-    log_error "Picard not found in PATH or as jar file: ${picard}"
-    exit 1
-fi
 
 ###############################################################################
 ### 6. Check mandatory files
@@ -319,7 +287,7 @@ trap 'rm -rf "${OUTPUT_DIR}/tmp" 2>/dev/null' EXIT
 ###############################################################################
 
 ASSEMBLY_FILE=""
-ASSEMBLY_FILE_DECOMPRESSED=""  # Track if we created a decompressed temp file
+ASSEMBLY_FILE_LOCAL=""  # Track if we created a local copy of an external assembly
 
 # Priority 1: Use explicitly provided contigs file
 if [[ -n "${CONTIGS}" ]]; then
@@ -380,23 +348,35 @@ if [[ -L "${ASSEMBLY_FILE}" ]]; then
   log "Resolved symbolic link: ${ASSEMBLY_FILE_ORIGINAL} -> ${ASSEMBLY_FILE}"
 fi
 
-# Handle compressed assembly files
-if [[ "${ASSEMBLY_FILE}" == *.gz ]]; then
-  log "Detected gzipped assembly file. Decompressing..."
+# Handle external assembly files (copy to OUTPUT_DIR to avoid polluting original directory with BWA indices)
+if [[ -n "${CONTIGS}" || -n "${ASSEM_DIR}" ]]; then
 
-  # Create temporary decompressed file in output directory
-  ASSEMBLY_FILE_DECOMPRESSED="${OUTPUT_DIR}/$(basename "${ASSEMBLY_FILE}" .gz)"
+  # Check if file is compressed
+  if [[ "${ASSEMBLY_FILE}" == *.gz ]]; then
+    log "Detected gzipped assembly file. Decompressing to output directory..."
+    ASSEMBLY_FILE_LOCAL="${OUTPUT_DIR}/$(basename "${ASSEMBLY_FILE}" .gz)"
 
-  "${gunzip}" -c "${ASSEMBLY_FILE}" > "${ASSEMBLY_FILE_DECOMPRESSED}" || {
-    log_error "Failed to decompress assembly file."
-    exit 1
-  }
+    "${gunzip}" -c "${ASSEMBLY_FILE}" > "${ASSEMBLY_FILE_LOCAL}" || {
+      log_error "Failed to decompress assembly file."
+      exit 1
+    }
 
-  log "Decompressed to: ${ASSEMBLY_FILE_DECOMPRESSED}"
+    log "Decompressed: $(basename "${ASSEMBLY_FILE}") -> $(basename "${ASSEMBLY_FILE_LOCAL}")"
+  else
+    log "Copying external assembly file to output directory..."
+    ASSEMBLY_FILE_LOCAL="${OUTPUT_DIR}/$(basename "${ASSEMBLY_FILE}")"
 
-  # Update ASSEMBLY_FILE to point to decompressed version
-  ASSEMBLY_FILE="${ASSEMBLY_FILE_DECOMPRESSED}"
-  check_file "${ASSEMBLY_FILE}" "decompressed assembly file"
+    cp "${ASSEMBLY_FILE}" "${ASSEMBLY_FILE_LOCAL}" || {
+      log_error "Failed to copy assembly file to output directory."
+      exit 1
+    }
+
+    log "Copied: $(basename "${ASSEMBLY_FILE}") -> output directory"
+  fi
+
+  # Point ASSEMBLY_FILE to the local copy for downstream processing
+  ASSEMBLY_FILE="${ASSEMBLY_FILE_LOCAL}"
+  check_file "${ASSEMBLY_FILE}" "assembly file in output directory"
 fi
 
 ###############################################################################
@@ -504,11 +484,11 @@ rm -f "${ASSEMBLY_FILE}".{amb,ann,bwt,pac,sa} || {
   log_warn "Failed to remove some BWA index files (non-fatal)."
 }
 
-# Remove temporary decompressed assembly file if created
-if [[ -n "${ASSEMBLY_FILE_DECOMPRESSED}" && -f "${ASSEMBLY_FILE_DECOMPRESSED}" ]]; then
-  log "Removing temporary decompressed assembly file..."
-  rm -f "${ASSEMBLY_FILE_DECOMPRESSED}" || {
-    log_warn "Failed to remove temporary decompressed assembly file (non-fatal)."
+# Remove temporary local copy of external assembly file if created
+if [[ -n "${ASSEMBLY_FILE_LOCAL}" && -f "${ASSEMBLY_FILE_LOCAL}" ]]; then
+  log "Removing temporary assembly file from output directory..."
+  rm -f "${ASSEMBLY_FILE_LOCAL}" || {
+    log_warn "Failed to remove temporary assembly file (non-fatal)."
   }
 fi
 
